@@ -38,14 +38,12 @@
 
         <h3><fmt:message key="carClass"/></h3>
         <div class="metod">
-
             <c:forEach items="${orderChoice}" var="order">
                 <div>
-                    <input type="radio" name="class" id=${order.id} value=${order.id}/>
+                    <input type="radio" name="orderChoice" id=${order.id} value=${order.id}/>
                     <label class="radio" for=${order.id}>${order.carName} ${order.passengers}</label>
                 </div>
             </c:forEach>
-
         </div>
 
         <c:choose>

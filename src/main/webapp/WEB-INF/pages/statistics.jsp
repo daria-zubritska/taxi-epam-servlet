@@ -37,16 +37,31 @@
         <table class="table responsive" id="sort">
             <thead>
             <tr>
-                <th scope="col"><fmt:message key="userID"/></th>
                 <th scope="col"><fmt:message key="userName"/></th>
-                <th scope="col"><fmt:message key="carID"/></th>
                 <th scope="col"><fmt:message key="carName"/></th>
                 <th scope="col"><fmt:message key="orderDate"/></th>
-                <th scope="col"><fmt:message key="orderTime"/></th>
                 <th scope="col"><fmt:message key="costOrder"/></th>
             </tr>
             </thead>
             <tbody>
+
+            <c:forEach items="${orderChoice}" var="order">
+                            <tr>
+                                <td data-table-header=<fmt:message key="userName"/>>
+                                    ${order.userName}
+                                </td>
+                                <td data-table-header=<fmt:message key="carName"/>>
+
+                                </td>
+                                <td data-table-header=<fmt:message key="orderDate"/>>
+
+                                </td>
+                                <td data-table-header=<fmt:message key="costOrder"/>>
+
+                                </td>
+                            </tr>
+            </c:forEach>
+
             <%--            <tr>--%>
             <%--                <td data-table-header="Title">Parent Adolescent Relationship Factors and Adolescent Outcomes Among High-Risk Families.</td>--%>
             <%--                <td data-table-header="Authors">Matthew Withers, Lenore McWey, Mallory Lucier-Greer</td>--%>

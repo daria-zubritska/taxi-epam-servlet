@@ -15,9 +15,9 @@ public class OrderDAO {
     public static final String SQL_ORDER_BY_ID = "SELECT * FROM orders WHERE id=?";
     public static final String SQL_CREATE_ORDER = "INSERT INTO orders(user_id, car_id, location_from, location_to, order_date, passengers, cost) VALUES(?, ?, ?, ?, ?, ?, ?)";
     public static final String SQL_DELETE_ORDER = "DELETE from orders WHERE id=?";
-    public static final String SQL_ORDER_BY_USER = "SELECT * FROM orders WHERE user_id=?";
-    public static final String SQL_ORDER_BY_DATE = "SELECT * FROM orders WHERE order_date=?";
-    public static final String SQL_GET_ORDERS = "SELECT * FROM orders";
+    public static final String SQL_ORDER_BY_USER = "SELECT * FROM orders LEFT JOIN cars c on c.id = orders.car_id LEFT JOIN users u on u.id = orders.user_id WHERE user_id=?";
+    public static final String SQL_ORDER_BY_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.id = orders.car_id LEFT JOIN users u on u.id = orders.user_id WHERE order_date=?";
+    public static final String SQL_GET_ORDERS = "SELECT * FROM orders LEFT JOIN cars c on c.id = orders.car_id LEFT JOIN users u on u.id = orders.user_id";
     public static final String SQL_GET_LOCATIONS = "SELECT * FROM locations";
 
     public static final String FIELD_ID = "id";
@@ -28,6 +28,9 @@ public class OrderDAO {
     public static final String FIELD_ORDER_DATE = "order_date";
     public static final String FIELD_PASSENGERS = "passengers";
     public static final String FIELD_COST = "cost";
+
+    public static final String FIELD_CAR_NAME = "car_name";
+    public static final String FIELD_USER_NAME = "user_name";
 
 
     private static Order mapResultSet(ResultSet rs) {
@@ -42,6 +45,8 @@ public class OrderDAO {
             order.setOrderDate(rs.getDate(FIELD_ORDER_DATE).toLocalDate());
             order.setPassengers(rs.getInt(FIELD_PASSENGERS));
             order.setCost(BigDecimal.valueOf(rs.getLong(FIELD_COST)));
+            order.setUserName(rs.getString(FIELD_USER_NAME));
+            order.setCarName(rs.getString(FIELD_CAR_NAME));
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }
