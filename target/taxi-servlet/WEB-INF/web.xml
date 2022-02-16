@@ -25,6 +25,11 @@
     <location>/WEB-INF/pages/error.jsp</location>
   </error-page>
 
+  <error-page>
+    <error-code>500</error-code>
+    <location>/WEB-INF/pages/errorOther.jsp</location>
+  </error-page>
+
   <filter>
     <filter-name>LangFilter</filter-name>
     <filter-class>filter.LangFilter</filter-class>

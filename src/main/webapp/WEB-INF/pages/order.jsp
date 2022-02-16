@@ -28,25 +28,23 @@
 
 <div class="main-block">
     <h1><fmt:message key="orderForm"/></h1>
-    <form action="/">
+    <form action="/makeOrder" method="post">
         <div class="info">
-            <select>
-                <option value="from" disabled selected><fmt:message key="urLoc"/></option>
-                <%--                <option value="2">2</option>--%>
-                <%--                <option value="4">4</option>--%>
-                <%--                <option value="6">6</option>--%>
+            <select name="loc_from">
+                <option value="" disabled selected><fmt:message key="urLoc"/></option>
+                <c:forEach items="${locationList}" var="item">
+                    <option value=<c:out value="${item}"/>><c:out value="${item}"/></option>
+                </c:forEach>
             </select>
-            <select>
-                <option value="to" disabled selected><fmt:message key="destination"/></option>
-                <%--                <option value="2">2</option>--%>
-                <%--                <option value="4">4</option>--%>
-                <%--                <option value="6">6</option>--%>
+            <select name="loc_to">
+                <option value="" disabled selected><fmt:message key="destination"/></option>
+                <c:forEach items="${locationList}" var="item">
+                    <option value=<c:out value="${item}"/>><c:out value="${item}"/></option>
+                </c:forEach>
             </select>
 
-            <select>
-                <option value=
-                                "passengers" disabled selected>
-                    <fmt:message key="numOfPassengers"/></option>
+            <select name="passengers">
+                <option value="" disabled selected><fmt:message key="numOfPassengers"/></option>
                 <option value="2">2</option>
                 <option value="4">4</option>
                 <option value="6">6</option>
@@ -56,19 +54,24 @@
         <h3><fmt:message key="carClass"/></h3>
         <div class="metod">
             <div>
-                <input type="radio" value="none" id="radioOne" name="metod" value="cheap" checked/>
+                <input type="radio" id="radioOne" name="class" value="cheap" checked/>
                 <label for="radioOne" class="radio"><fmt:message key="cheap"/></label>
             </div>
             <div>
-                <input type="radio" value="none" id="radioTwo" name="metod" value="comfort"/>
+                <input type="radio" id="radioTwo" name="class" value="comfort"/>
                 <label for="radioTwo" class="radio"><fmt:message key="comfort"/></label>
             </div>
             <div>
-                <input type="radio" value="none" id="radioThree" name="metod" value="business"/>
+                <input type="radio" id="radioThree" name="class" value="business"/>
                 <label for="radioThree" class="radio"><fmt:message key="business"/></label>
             </div>
         </div>
-        <button href="/orderSubmit" class="button"><fmt:message key="submit"/></button>
+        <c:choose>
+            <c:when test="${requestScope.error != null}">
+                <div style="color:red; text-align: center;"><fmt:message key="${requestScope.error}"/></div>
+            </c:when>
+        </c:choose>
+        <button type="submit" class="button"><fmt:message key="submit"/></button>
     </form>
 </div>
 </body>

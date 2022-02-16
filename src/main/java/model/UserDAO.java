@@ -90,8 +90,7 @@ public class UserDAO {
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_ADD_USER)) {
             pst.setString(1, email);
-            String hashedPass= Security.hashPassword(password);
-            pst.setString(2, hashedPass);
+            pst.setString(2, password);
             pst.setString(3, name);
             pst.setString(4, "USER");
 

@@ -7,14 +7,29 @@ import java.util.Objects;
 
 public class Order {
     private int id;
+    private String carName;
     private int userId;
     private int carId;
     private LocalDate orderDate;
-    private LocalTime orderTime;
     private String locationTo;
     private String locationFrom;
     private int passengers;
     private BigDecimal cost;
+
+    public Order(int id, String carName, int userId, int carId, LocalDate orderDate, String locationTo, String locationFrom, int passengers, BigDecimal cost) {
+        this.id = id;
+        this.carName = carName;
+        this.userId = userId;
+        this.carId = carId;
+        this.orderDate = orderDate;
+        this.locationTo = locationTo;
+        this.locationFrom = locationFrom;
+        this.passengers = passengers;
+        this.cost = cost;
+    }
+
+    public Order() {
+    }
 
     public int getPassengers() {
         return passengers;
@@ -64,14 +79,6 @@ public class Order {
         this.orderDate = orderDate;
     }
 
-    public LocalTime getOrderTime() {
-        return orderTime;
-    }
-
-    public void setOrderTime(LocalTime orderTime) {
-        this.orderTime = orderTime;
-    }
-
     public String getLocationTo() {
         return locationTo;
     }
@@ -93,11 +100,11 @@ public class Order {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Order order = (Order) o;
-        return userId == order.userId && carId == order.carId && orderDate.equals(order.orderDate) && orderTime.equals(order.orderTime) && locationTo.equals(order.locationTo) && locationFrom.equals(order.locationFrom);
+        return userId == order.userId && carId == order.carId && orderDate.equals(order.orderDate) && locationTo.equals(order.locationTo) && locationFrom.equals(order.locationFrom);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, carId, orderDate, orderTime, locationTo, locationFrom);
+        return Objects.hash(userId, carId, orderDate, locationTo, locationFrom);
     }
 }

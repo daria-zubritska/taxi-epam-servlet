@@ -13,11 +13,12 @@ import java.util.List;
 public class OrderDAO {
 
     public static final String SQL_ORDER_BY_ID = "SELECT * FROM orders WHERE id=?";
-    public static final String SQL_CREATE_ORDER = "INSERT INTO orders(user_id, car_id, location_from, location_to, order_date, order_time, passengers, cost) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+    public static final String SQL_CREATE_ORDER = "INSERT INTO orders(user_id, car_id, location_from, location_to, order_date, passengers, cost) VALUES(?, ?, ?, ?, ?, ?, ?)";
     public static final String SQL_DELETE_ORDER = "DELETE from orders WHERE id=?";
     public static final String SQL_ORDER_BY_USER = "SELECT * FROM orders WHERE user_id=?";
     public static final String SQL_ORDER_BY_DATE = "SELECT * FROM orders WHERE order_date=?";
     public static final String SQL_GET_ORDERS = "SELECT * FROM orders";
+    public static final String SQL_GET_LOCATIONS = "SELECT * FROM locations";
 
     public static final String FIELD_ID = "id";
     public static final String FIELD_USER_ID = "user_id";
@@ -25,7 +26,6 @@ public class OrderDAO {
     public static final String FIELD_LOCATION_FROM = "location_from";
     public static final String FIELD_LOCATION_TO = "location_to";
     public static final String FIELD_ORDER_DATE = "order_date";
-    public static final String FIELD_ORDER_TIME = "order_time";
     public static final String FIELD_PASSENGERS = "passengers";
     public static final String FIELD_COST = "cost";
 
@@ -40,7 +40,6 @@ public class OrderDAO {
             order.setLocationFrom(rs.getString(FIELD_LOCATION_FROM));
             order.setLocationTo(rs.getString(FIELD_LOCATION_TO));
             order.setOrderDate(rs.getDate(FIELD_ORDER_DATE).toLocalDate());
-            order.setOrderTime(rs.getTime(FIELD_ORDER_TIME).toLocalTime());
             order.setPassengers(rs.getInt(FIELD_PASSENGERS));
             order.setCost(BigDecimal.valueOf(rs.getLong(FIELD_COST)));
         } catch (SQLException e) {
@@ -75,9 +74,9 @@ public class OrderDAO {
             pst.setString(3, location_from);
             pst.setString(4, location_to);
             pst.setDate(5, Date.valueOf(order_date));
-            pst.setTime(6, Time.valueOf(String.valueOf(order_time)));
-            pst.setInt(7, passengers);
-            pst.setLong(8, Long.parseLong(cost.toString()));
+
+            pst.setInt(6, passengers);
+            pst.setLong(7, Long.parseLong(cost.toString()));
 
             result = pst.executeUpdate() > 0;
         } catch (SQLException ex) {
@@ -147,6 +146,21 @@ public class OrderDAO {
             ex.printStackTrace();
         }
         return orders;
+    }
+
+    public static List<String> getAllLocations() {
+        List<String> locations = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_GET_LOCATIONS)) {
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    locations.add(rs.getString("location_name"));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return locations;
     }
 
 }

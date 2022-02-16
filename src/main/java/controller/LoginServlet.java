@@ -58,10 +58,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-
         User user = UserDAO.findUserByEmail(email);
-
-
 
         if(user == null) {
             viewAttributes.put(ERROR_ATTRIBUTE, "userNull");

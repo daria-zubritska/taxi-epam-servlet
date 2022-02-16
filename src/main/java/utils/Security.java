@@ -22,7 +22,7 @@ public class Security {
 
     public static void main(String[] args) throws Exception {
 
-        System.out.println(hashPassword("adminivan"));
+        System.out.println(hashPassword("test2password"));
     }
 
     /**
