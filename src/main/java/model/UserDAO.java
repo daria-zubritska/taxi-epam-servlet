@@ -1,0 +1,127 @@
+package model;
+
+import database.DBManager;
+import model.entity.User;
+import utils.Security;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class UserDAO {
+
+    public static final String SQL_GET_USER_BY_ID = "SELECT * FROM users LEFT JOIN roles ON users.role_id=roles.role_id WHERE id=?";
+    public static final String SQL_GET_USER_BY_EMAIL = "SELECT * FROM users LEFT JOIN roles ON users.role_id = roles.role_id WHERE email=?";
+    public static final String SQL_GET_ALL_USERS = "SELECT * FROM users LEFT JOIN roles ON users.role_id=roles.role_id";
+    public static final String SQL_ADD_USER = "INSERT INTO users(email,password,name,role_id)VALUES(?, ?, ?, (SELECT role_id FROM roles WHERE role_name=? LIMIT 1))";
+
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_NAME = "name";
+    private static final String FIELD_EMAIl = "email";
+    private static final String FIELD_PASSWORD = "password";
+    private static final String FIELD_ROLE_NAME = "role_name";
+
+    public static User mapResultSet(ResultSet rs) {
+        User user = null;
+        try {
+            user = new User();
+            user.setId(rs.getInt(FIELD_ID));
+            user.setName(rs.getString(FIELD_NAME));
+            user.setEmail(rs.getString(FIELD_EMAIl));
+            user.setPassword(rs.getString(FIELD_PASSWORD));
+            user.setRole(User.Role.valueOf(rs.getString(FIELD_ROLE_NAME).toUpperCase()));
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
+        return user;
+    }
+
+    public static User findUserById(long id) {
+        User user = null;
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_GET_USER_BY_ID)) {
+            pst.setLong(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if(rs.next())
+                    user = mapResultSet(rs);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return user;
+    }
+
+    public static User findUserByEmail(String email) {
+        User user = null;
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_GET_USER_BY_EMAIL)) {
+            pst.setString(1, email);
+            try (ResultSet rs = pst.executeQuery()) {
+                if(rs.next())
+                    user = mapResultSet(rs);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return user;
+    }
+
+    public static List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_GET_ALL_USERS)) {
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return users;
+    }
+
+    public static boolean addUser(String email, String password, String name) {
+        boolean result = false;
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_ADD_USER)) {
+            pst.setString(1, email);
+            String hashedPass= Security.hashPassword(password);
+            pst.setString(2, hashedPass);
+            pst.setString(3, name);
+            pst.setString(4, "USER");
+
+            result = pst.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static User checkUser(User user) {
+
+        User dbUser = findUserByEmail(user.getEmail());
+        String hashedPass = null;
+
+        try {
+            hashedPass = Security.hashPassword(user.getPassword());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if(dbUser.getPassword().equals(hashedPass)) {
+            return dbUser;
+        }
+        else{
+            return null;
+        }
+    }
+
+}
