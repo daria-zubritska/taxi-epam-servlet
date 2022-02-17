@@ -13,13 +13,13 @@ import java.util.List;
 
 public class UserDAO {
 
-    public static final String SQL_GET_USER_BY_ID = "SELECT * FROM users LEFT JOIN roles ON users.role_id=roles.role_id WHERE id=?";
+    public static final String SQL_GET_USER_BY_ID = "SELECT * FROM users LEFT JOIN roles ON users.role_id=roles.role_id WHERE user_id=?";
     public static final String SQL_GET_USER_BY_EMAIL = "SELECT * FROM users LEFT JOIN roles ON users.role_id = roles.role_id WHERE email=?";
     public static final String SQL_GET_ALL_USERS = "SELECT * FROM users LEFT JOIN roles ON users.role_id=roles.role_id";
-    public static final String SQL_ADD_USER = "INSERT INTO users(email,password,name,role_id)VALUES(?, ?, ?, (SELECT role_id FROM roles WHERE role_name=? LIMIT 1))";
+    public static final String SQL_ADD_USER = "INSERT INTO users(email,password,user_name,role_id)VALUES(?, ?, ?, (SELECT role_id FROM roles WHERE role_name=? LIMIT 1))";
 
-    private static final String FIELD_ID = "id";
-    private static final String FIELD_NAME = "name";
+    private static final String FIELD_ID = "user_id";
+    private static final String FIELD_NAME = "user_name";
     private static final String FIELD_EMAIl = "email";
     private static final String FIELD_PASSWORD = "password";
     private static final String FIELD_ROLE_NAME = "role_name";

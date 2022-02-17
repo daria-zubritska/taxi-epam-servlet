@@ -1,7 +1,11 @@
 package controller;
 
+import model.dto.OrderDTO;
+import org.apache.log4j.Logger;
+
 import model.CarDAO;
 import model.OrderDAO;
+import model.service.OrderService;
 import model.entity.Car;
 import model.entity.Order;
 import model.entity.User;
@@ -13,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -25,6 +30,8 @@ public class OrderServlet extends HttpServlet {
     private final static String CHOICE_ATTRIBUTE = "orderChoice";
     private static final String USER_ATTRIBUTE = "user";
     private static final String ABSENT_CHOICE_ATTRIBUTE = "absentUserChoice";
+
+    static Logger log = Logger.getLogger(OrderServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -51,6 +58,8 @@ public class OrderServlet extends HttpServlet {
         viewAttributes.put("class", carClass);
 
 
+        log.info(loc_from + " " + loc_to + " " + passengers + " " + carClass);
+
         if(loc_from == null || loc_to == null){
             viewAttributes.put(ERROR_ATTRIBUTE, "locationNotValid");
             passErrorToView(req, resp, viewAttributes);
@@ -62,38 +71,83 @@ public class OrderServlet extends HttpServlet {
             return;
         }
 
+        Car car = CarDAO.findAppropriateCar(carClass, Integer.parseInt(passengers));
 
-        List<Car> cars = CarDAO.findAppropriateCars(carClass, Integer.parseInt(passengers));
+//        List<OrderDTO> orderChoice = new ArrayList<>();
 
-        List<Order> orderChoice = new ArrayList<>();
+        if(car == null){
 
-        if(cars == null){
+            Car carByPass = CarDAO.findCarByPassengers(Integer.parseInt(passengers));
+
+            if(carByPass != null){
+
+                BigDecimal idealCost = BigDecimal.valueOf(CarDAO.findAppropriateCarCost(carClass, Integer.parseInt(passengers)));
+
+                User user = (User) session.getAttribute(USER_ATTRIBUTE);
+                Date date = new Date();
+
+                BigDecimal cost = OrderService.cost(carByPass.getCost(), loc_from, loc_to);
+                BigDecimal costWithDiscount = OrderService.costWithDiscount(idealCost, carByPass.getCost(), loc_from, loc_to);
+
+                session.setAttribute(ABSENT_CHOICE_ATTRIBUTE, "noNeeded");
+
+                OrderDTO order = new OrderDTO(0,
+                        carByPass.getName(),
+                        user.getId(),
+                        carByPass.getId(),
+                        date.toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate(),
+                        loc_to,
+                        loc_from,
+                        Integer.parseInt(passengers),
+                        cost);
+
+                order.setCostWithDiscount(costWithDiscount);
+
+                session.setAttribute(CHOICE_ATTRIBUTE, order);
+            }else{
+
+
+
+            }
 
             session.setAttribute(ABSENT_CHOICE_ATTRIBUTE, "chooseOther");
 
-            session.setAttribute(CHOICE_ATTRIBUTE, orderChoice);
+//            session.setAttribute(CHOICE_ATTRIBUTE, orderChoice);
 
             resp.sendRedirect("/orderSubmit");
 
         }else{
 
-            Car car = cars.get(0);
             User user = (User) session.getAttribute(USER_ATTRIBUTE);
             Date date = new Date();
 
-            orderChoice.add(new Order(0,
+            BigDecimal cost = OrderService.cost(car.getCost(), loc_from, loc_to);
+
+//            orderChoice.add(new OrderDTO(0,
+//                    car.getName(),
+//                    user.getId(),
+//                    car.getId(),
+//                    date.toInstant()
+//                    .atZone(ZoneId.systemDefault())
+//                    .toLocalDate(),
+//                    loc_to,
+//                    loc_from,
+//                    Integer.parseInt(passengers),
+//                    cost));
+
+            session.setAttribute(CHOICE_ATTRIBUTE, new OrderDTO(0,
                     car.getName(),
                     user.getId(),
                     car.getId(),
                     date.toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate(),
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate(),
                     loc_to,
                     loc_from,
                     Integer.parseInt(passengers),
-                    car.getCost()));
-
-            session.setAttribute(CHOICE_ATTRIBUTE, orderChoice);
+                    cost));
 
             resp.sendRedirect("/orderSubmit");
 

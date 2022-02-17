@@ -13,15 +13,16 @@ import java.util.List;
 
 public class CarDAO {
 
-    public static final String SQL_GET_CAR_BY_ID = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE id=?";
+    public static final String SQL_GET_CAR_BY_ID = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE car_id=?";
     public static final String SQL_GET_CAR_BY_TYPE = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE type_name=? AND cars.status_id =?";
     public static final String SQL_GET_ALL_CARS = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id";
     public static final String SQL_GET_CAR_BY_PASSENGERS = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE passengers=? AND cars.status_id =?";
-    public static final String SQL_UPDATE_STATUS = "UPDATE cars SET cars.status_id=? WHERE cars.id=?";
+    public static final String SQL_UPDATE_STATUS = "UPDATE cars SET cars.status_id=? WHERE cars.car_id=?";
     public static final String SQL_GET_APPROPRIATE_CARS = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE passengers=? AND cars.status_id =? AND type_name=?";
+    public static final String SQL_GET_APPROPRIATE_CAR_COST = "SELECT cost FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE passengers=? AND type_name=?";
 
-    private static final String FIELD_ID = "id";
-    private static final String FIELD_NAME = "name";
+    private static final String FIELD_ID = "car_id";
+    private static final String FIELD_NAME = "car_name";
     private static final String FIELD_COST = "cost";
     private static final String FIELD_STATUS = "status";
     private static final String FIELD_TYPE = "type_name";
@@ -77,22 +78,21 @@ public class CarDAO {
 
     }
 
-    public static List<Car> findAppropriateCars(String type, int passengers) {
-        List<Car> cars = null;
+    public static Car findAppropriateCar(String type, int passengers) {
+        Car car = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_APPROPRIATE_CARS)) {
             pst.setInt(1, passengers);
             pst.setInt(2, 1);
             pst.setString(3, type);
             try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    cars.add(mapResultSet(rs));
-                }
+                if (rs.next())
+                    car = mapResultSet(rs);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return cars;
+        return car;
 
     }
 
@@ -107,21 +107,21 @@ public class CarDAO {
         }
     }
 
-    public static List<Car> findCarsByPassengers(int passengers) {
-        List<Car> cars = new ArrayList<>();
+    public static Car findCarByPassengers(int passengers) {
+        Car car = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_CAR_BY_PASSENGERS)) {
             pst.setInt(1, passengers);
             pst.setInt(2, 1);
             try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    cars.add(mapResultSet(rs));
+                if (rs.next()) {
+                    car = mapResultSet(rs);
                 }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return cars;
+        return car;
     }
 
     public static List<Car> getAllCars() {
@@ -140,5 +140,20 @@ public class CarDAO {
     }
 
 
+    public static long findAppropriateCarCost(String type, int passengers) {
+        long cost = 0;
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_GET_APPROPRIATE_CAR_COST)) {
+            pst.setInt(1, passengers);
+            pst.setString(2, type);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next())
+                    cost = rs.getLong(FIELD_COST);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return cost;
+    }
 }
 

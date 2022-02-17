@@ -15,10 +15,12 @@ public class OrderDAO {
     public static final String SQL_ORDER_BY_ID = "SELECT * FROM orders WHERE id=?";
     public static final String SQL_CREATE_ORDER = "INSERT INTO orders(user_id, car_id, location_from, location_to, order_date, passengers, cost) VALUES(?, ?, ?, ?, ?, ?, ?)";
     public static final String SQL_DELETE_ORDER = "DELETE from orders WHERE id=?";
-    public static final String SQL_ORDER_BY_USER = "SELECT * FROM orders LEFT JOIN cars c on c.id = orders.car_id LEFT JOIN users u on u.id = orders.user_id WHERE user_id=?";
-    public static final String SQL_ORDER_BY_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.id = orders.car_id LEFT JOIN users u on u.id = orders.user_id WHERE order_date=?";
-    public static final String SQL_GET_ORDERS = "SELECT * FROM orders LEFT JOIN cars c on c.id = orders.car_id LEFT JOIN users u on u.id = orders.user_id";
+    public static final String SQL_ORDER_BY_USER = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE user_id=?";
+    public static final String SQL_ORDER_BY_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE order_date=?";
+    public static final String SQL_GET_ORDERS = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id";
     public static final String SQL_GET_LOCATIONS = "SELECT * FROM locations";
+    public static final String SQL_GET_LOCATION_ID = "SELECT location_id FROM locations WHERE location_name=?";
+    public static final String SQL_GET_DISTANCE = "SELECT distance FROM distances WHERE location_1=? AND location_2=?";
 
     public static final String FIELD_ID = "id";
     public static final String FIELD_USER_ID = "user_id";
@@ -69,7 +71,7 @@ public class OrderDAO {
         return order;
     }
 
-    public static boolean addOrder(int user_id, int car_id, String location_from, String location_to, LocalDate order_date, LocalDateTime order_time, int passengers, BigDecimal cost) {
+    public static boolean addOrder(int user_id, int car_id, String location_from, String location_to, LocalDate order_date, int passengers, BigDecimal cost) {
         boolean result = false;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_CREATE_ORDER)) {
@@ -166,6 +168,50 @@ public class OrderDAO {
             ex.printStackTrace();
         }
         return locations;
+    }
+
+    private static Integer getLocIdByName(String location){
+        Integer locId = null;
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_GET_LOCATION_ID)) {
+            pst.setString(1, location);
+            try (ResultSet rs = pst.executeQuery()) {
+                if(rs.next())
+                    locId = Integer.valueOf(rs.getInt("location_id"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return locId;
+    }
+
+    public static int getDistance(String loc_from, String loc_to){
+        int dist = 1;
+
+        int loc1Id = getLocIdByName(loc_from);
+        int loc2Id = getLocIdByName(loc_to);
+
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_GET_DISTANCE)) {
+
+            if(loc1Id <= loc2Id){
+                pst.setInt(1, loc1Id);
+                pst.setInt(2, loc2Id);
+            }else{
+                pst.setInt(1, loc2Id);
+                pst.setInt(2, loc1Id);
+            }
+
+            try (ResultSet rs = pst.executeQuery()) {
+                if(rs.next())
+                    dist = rs.getInt("distance");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return dist;
     }
 
 }

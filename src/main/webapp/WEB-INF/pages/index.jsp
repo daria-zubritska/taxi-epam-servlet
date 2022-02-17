@@ -49,7 +49,7 @@
 <body>
 <p>
 <div>
-    <fmt:message key="mainInfo"/>
+
 </div>
 </p>
 </body>

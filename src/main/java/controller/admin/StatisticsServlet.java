@@ -13,7 +13,7 @@ import java.io.IOException;
 public class StatisticsServlet extends HttpServlet {
 
     private static String PATH = "/WEB-INF/pages/statistics.jsp";
-    private final static String STATISTICS_ATTRIBUTE = "locationList";
+    private final static String STATISTICS_ATTRIBUTE = "statsList";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

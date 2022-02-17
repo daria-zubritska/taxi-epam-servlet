@@ -50,22 +50,14 @@
                 <option value="6">6</option>
             </select>
 
+            <select name="class">
+                <option value="cheap" selected><fmt:message key="cheap"/></option>
+                <option value="comfort"><fmt:message key="comfort"/></option>
+                <option value="business"><fmt:message key="business"/></option>
+            </select>
+
         </div>
-        <h3><fmt:message key="carClass"/></h3>
-        <div class="metod">
-            <div>
-                <input type="radio" id="radioOne" name="class" value="cheap" checked/>
-                <label for="radioOne" class="radio"><fmt:message key="cheap"/></label>
-            </div>
-            <div>
-                <input type="radio" id="radioTwo" name="class" value="comfort"/>
-                <label for="radioTwo" class="radio"><fmt:message key="comfort"/></label>
-            </div>
-            <div>
-                <input type="radio" id="radioThree" name="class" value="business"/>
-                <label for="radioThree" class="radio"><fmt:message key="business"/></label>
-            </div>
-        </div>
+
         <c:choose>
             <c:when test="${requestScope.error != null}">
                 <div style="color:red; text-align: center;"><fmt:message key="${requestScope.error}"/></div>

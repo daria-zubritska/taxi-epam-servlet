@@ -1,3 +1,4 @@
+<%@ taglib prefix="ftm" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@include file="/WEB-INF/jspf/header.jspf" %>
 
 <head>
@@ -31,34 +32,59 @@
     <form action="/orderSubmit" method="post">
 
         <c:choose>
-            <c:when test="${requestScope.absentUserChoice != null}">
-            <h1><fmt:message key="chooseOther"/></h1>
-            </c:when>
-        </c:choose>
+        <c:when test="${absentUserChoice != null}">
+        <h3><fmt:message key="chooseOther"/></h3>
 
-        <h3><fmt:message key="carClass"/></h3>
         <div class="metod">
 
-            <c:forEach items="${orderChoice}" var="order">
-                <div>
-                    <input type="radio" id="radioOne"  name="class" value="cheap" checked value=<c:out value="${order}"/>/>
-                    <label for="radioOne" class="radio"><fmt:message key="cheap"/></label>
-                </div>
+            <input type="radio" name="orderCheck" checked id=${orderChoice.id}; value=${orderChoice.id}>
+            <label class="radio" for=${orderChoice.id};>
+                <p>${orderChoice.carName}</p>
+                <p><fmt:message key="passengers"/> ${orderChoice.passengers}</p>
+                <space></space>
+                <p><fmt:message key="cost"/> ${orderChoice.cost} <ftm:message key="uah"/></p>
 
-                <option value=<c:out value="${order.}"/>><c:out value="${item}"/></option>
-            </c:forEach>
+                <c:choose>
+                    <c:when test="${orderChoice.costWithDiscount != null}">
+                        <space></space>
+                        <p><fmt:message key="costWithDiscount"/> ${orderChoice.costWithDiscount} <ftm:message key="uah"/></p>
+                    </c:when>
+                </c:choose>
+            </label>
+        </div>
+</c:when>
 
+<c:otherwise>
+    <h3><fmt:message key="yourOrder"/></h3>
+
+    <div class="metod">
+
+        <div>
+            <input type="radio" name="orderCheck" checked id=${orderChoice.id}; value=${orderChoice.id}>
+            <label class="radio" for=${orderChoice.id};>
+                <p>${orderChoice.carName}</p>
+                <p><fmt:message key="passengers"/> ${orderChoice.passengers}</p>
+                <space></space>
+                <p><fmt:message key="cost"/> ${orderChoice.cost} <ftm:message key="uah"/></p>
+
+            </label>
         </div>
 
-        <c:choose>
-            <c:when test="${requestScope.error != null}">
-                <div style="color:red; text-align: center;"><fmt:message key="${requestScope.error}"/></div>
-            </c:when>
-        </c:choose>
+    </div>
+</c:otherwise>
+</c:choose>
 
-        <button type="submit" class="button"><fmt:message key="submit"/></button>
-        <button href="/" class="button"><fmt:message key="cancel"/></button>
-    </form>
+<c:choose>
+    <c:when test="${requestScope.error != null}">
+        <div style="color:red; text-align: center;"><fmt:message key="${requestScope.error}"/></div>
+    </c:when>
+</c:choose>
+
+<div style="display: flex">
+    <button type="submit" class="button" name="submit" value="Submit btn"><fmt:message key="submit"/></button>
+    <button type="submit" class="button" name="cancel" value="Cancel btn"><fmt:message key="cancel"/></button>
+</div>
+</form>
 </div>
 </body>
 </html>
