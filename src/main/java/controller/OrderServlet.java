@@ -7,7 +7,6 @@ import model.CarDAO;
 import model.OrderDAO;
 import model.service.OrderService;
 import model.entity.Car;
-import model.entity.Order;
 import model.entity.User;
 
 import javax.servlet.ServletException;
@@ -73,7 +72,6 @@ public class OrderServlet extends HttpServlet {
 
         Car car = CarDAO.findAppropriateCar(carClass, Integer.parseInt(passengers));
 
-//        List<OrderDTO> orderChoice = new ArrayList<>();
 
         if(car == null){
 
@@ -106,15 +104,10 @@ public class OrderServlet extends HttpServlet {
                 order.setCostWithDiscount(costWithDiscount);
 
                 session.setAttribute(CHOICE_ATTRIBUTE, order);
-            }else{
-
+            }else {
 
 
             }
-
-            session.setAttribute(ABSENT_CHOICE_ATTRIBUTE, "chooseOther");
-
-//            session.setAttribute(CHOICE_ATTRIBUTE, orderChoice);
 
             resp.sendRedirect("/orderSubmit");
 
@@ -124,18 +117,6 @@ public class OrderServlet extends HttpServlet {
             Date date = new Date();
 
             BigDecimal cost = OrderService.cost(car.getCost(), loc_from, loc_to);
-
-//            orderChoice.add(new OrderDTO(0,
-//                    car.getName(),
-//                    user.getId(),
-//                    car.getId(),
-//                    date.toInstant()
-//                    .atZone(ZoneId.systemDefault())
-//                    .toLocalDate(),
-//                    loc_to,
-//                    loc_from,
-//                    Integer.parseInt(passengers),
-//                    cost));
 
             session.setAttribute(CHOICE_ATTRIBUTE, new OrderDTO(0,
                     car.getName(),
