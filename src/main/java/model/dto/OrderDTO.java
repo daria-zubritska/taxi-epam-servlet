@@ -16,8 +16,9 @@ public class OrderDTO {
     private int passengers;
     private BigDecimal cost;
     private BigDecimal costWithDiscount = null;
+    private String carClass;
 
-    public OrderDTO(int id, String carName, int userId, int carId, LocalDate orderDate, String locationTo, String locationFrom, int passengers, BigDecimal cost) {
+    public OrderDTO(int id, String carName, int userId, int carId, LocalDate orderDate, String locationTo, String locationFrom, int passengers, BigDecimal cost, String carClass) {
         this.id = id;
         this.carName = carName;
         this.userId = userId;
@@ -27,9 +28,18 @@ public class OrderDTO {
         this.locationFrom = locationFrom;
         this.passengers = passengers;
         this.cost = cost;
+        this.carClass = carClass;
     }
 
     public OrderDTO() {
+    }
+
+    public String getCarClass() {
+        return carClass;
+    }
+
+    public void setCarClass(String carClass) {
+        this.carClass = carClass;
     }
 
     public BigDecimal getCostWithDiscount() {

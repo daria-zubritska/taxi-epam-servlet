@@ -1,12 +1,14 @@
 package model.service;
 
 import model.OrderDAO;
+import model.entity.Car;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class OrderService {
 
-    private final static double DISCOUNT = 20;
+    private final static double DISCOUNT = 30;
 
     public static BigDecimal cost(BigDecimal costPerK, String loc_from, String loc_to) {
         BigDecimal cost = costPerK;
@@ -27,6 +29,22 @@ public class OrderService {
         cost = cost*dist;
 
         return BigDecimal.valueOf(cost - diskVal);
+    }
+
+    public static BigDecimal costForTwoCars(List<Car> cars, String loc_from, String loc_to) {
+        BigDecimal costPerK = cars.get(0).getCost();
+
+        costPerK.add(cars.get(1).getCost());
+
+        return cost(costPerK, loc_from, loc_to);
+    }
+
+    public static BigDecimal costWithDiscountForTwoCars(BigDecimal idealCost, List<Car> cars, String loc_from, String loc_to) {
+        BigDecimal costPerK = cars.get(0).getCost();
+
+        costPerK.add(cars.get(1).getCost());
+
+        return costWithDiscount(idealCost, costPerK, loc_from, loc_to);
     }
 
 

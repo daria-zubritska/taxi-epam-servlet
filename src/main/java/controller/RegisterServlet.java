@@ -24,7 +24,11 @@ public class RegisterServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher(PATH).forward(req, resp);
+        if (RequestUtils.getSessionAttribute(req, USER_ATTRIBUTE, User.class) != null) {
+            resp.sendRedirect("/makeOrder");
+        } else {
+            req.getRequestDispatcher(PATH).forward(req, resp);
+        }
     }
 
     @Override

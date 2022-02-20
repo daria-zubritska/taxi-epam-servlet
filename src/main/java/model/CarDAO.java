@@ -2,6 +2,7 @@ package model;
 
 import database.DBManager;
 import model.entity.Car;
+import model.service.CarService;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -21,6 +22,8 @@ public class CarDAO {
     public static final String SQL_GET_APPROPRIATE_CARS = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE passengers=? AND cars.status_id =? AND type_name=?";
     public static final String SQL_GET_APPROPRIATE_CAR_COST = "SELECT cost FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE passengers=? AND type_name=?";
 
+    public static final String SQL_GET_TWO_CARS_BY_TYPE = "SELECT x.car_id as x_id , y.car_id as y_id FROM cars x JOIN cars y ON y.car_id > x.car_id WHERE x.passengers + y.passengers =? AND x.type_id = ? AND y.type_id = ? AND x.status_id = 1 AND y.status_id = 1 LIMIT 1;";
+
     private static final String FIELD_ID = "car_id";
     private static final String FIELD_NAME = "car_name";
     private static final String FIELD_COST = "cost";
@@ -34,7 +37,7 @@ public class CarDAO {
             car = new Car();
             car.setId(rs.getInt(FIELD_ID));
             car.setName(rs.getString(FIELD_NAME));
-            car.setCost(BigDecimal.valueOf(rs.getLong(FIELD_COST)));
+            car.setCost(rs.getBigDecimal(FIELD_COST));
             car.setStatus(Car.Status.valueOf(rs.getString(FIELD_STATUS).toUpperCase()));
             car.setCategory(Car.CarType.valueOf(rs.getString(FIELD_TYPE).toUpperCase()));
             car.setPassengers(rs.getInt(FIELD_PASSENGERS));
@@ -61,20 +64,23 @@ public class CarDAO {
         return car;
     }
 
-    public static Car findCarByType(String type) {
-        Car car = null;
+    public static List<Car> findTwoCarsByType(String type, int passengers) {
+        List<Car> cars = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement pst = con.prepareStatement(SQL_GET_CAR_BY_TYPE)) {
-            pst.setString(1, type);
-            pst.setInt(2, 1);
+             PreparedStatement pst = con.prepareStatement(SQL_GET_TWO_CARS_BY_TYPE)) {
+            pst.setInt(1, passengers);
+            pst.setInt(2, CarService.getTypeId(type));
+            pst.setInt(3, CarService.getTypeId(type));
             try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next())
-                    car = mapResultSet(rs);
+                if (rs.next()) {
+                    cars.add(findCarById(rs.getInt("x_id")));
+                    cars.add(findCarById(rs.getInt("y_id")));
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return car;
+        return cars;
 
     }
 
@@ -140,15 +146,15 @@ public class CarDAO {
     }
 
 
-    public static long findAppropriateCarCost(String type, int passengers) {
-        long cost = 0;
+    public static BigDecimal findAppropriateCarCost(String type, int passengers) {
+        BigDecimal cost = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_APPROPRIATE_CAR_COST)) {
             pst.setInt(1, passengers);
             pst.setString(2, type);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next())
-                    cost = rs.getLong(FIELD_COST);
+                    cost = rs.getBigDecimal(FIELD_COST);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

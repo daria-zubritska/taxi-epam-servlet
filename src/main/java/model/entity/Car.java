@@ -1,6 +1,7 @@
 package model.entity;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Objects;
 
 public class Car {
@@ -58,6 +59,8 @@ public class Car {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+
 
     @Override
     public boolean equals(Object o) {

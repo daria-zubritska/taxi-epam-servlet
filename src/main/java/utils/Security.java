@@ -30,7 +30,7 @@ public class Security {
      *
      * @param password Password string to hash
      * @return Hexed password hash following by hexed salt
-     * @throws Exception when password cant be hashed by algorithm
+     * @throws Exception when password can`t be hashed by algorithm
      */
     public static String hashPassword(final String password) throws Exception {
         byte[] salt = new byte[SALT_LENGTH / 8];

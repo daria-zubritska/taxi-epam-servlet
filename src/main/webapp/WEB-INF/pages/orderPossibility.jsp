@@ -32,59 +32,84 @@
     <form action="/orderSubmit" method="post">
 
         <c:choose>
-        <c:when test="${absentUserChoice != null}">
-        <h3><fmt:message key="chooseOther"/></h3>
-
-        <div class="metod">
-
-            <input type="radio" name="orderCheck" checked id=${orderChoice.id}; value=${orderChoice.id}>
-            <label class="radio" for=${orderChoice.id};>
-                <p>${orderChoice.carName}</p>
-                <p><fmt:message key="passengers"/> ${orderChoice.passengers}</p>
-                <space></space>
-                <p><fmt:message key="cost"/> ${orderChoice.cost} <ftm:message key="uah"/></p>
+            <c:when test="${absentUserChoice != null}">
 
                 <c:choose>
-                    <c:when test="${orderChoice.costWithDiscount != null}">
-                        <space></space>
-                        <p><fmt:message key="costWithDiscount"/> ${orderChoice.costWithDiscount} <ftm:message key="uah"/></p>
+                    <c:when test="${doubleOrder == null}">
+                        <h3><fmt:message key="chooseOther"/></h3>
+
+                        <div class="metod">
+
+                            <input type="radio" name="orderCheck" checked id=${orderChoice.id}; value=${orderChoice.id}>
+                            <label class="radio" for=${orderChoice.id};>
+                                <p>${orderChoice.carName}</p>
+                                <p><ftm:message key="${orderChoice.carClass}"/></p>
+                                <p><fmt:message key="passengers"/> ${orderChoice.passengers}</p>
+                                <space></space>
+                                <p><fmt:message key="cost"/> ${orderChoice.cost} <ftm:message key="uah"/></p>
+
+                                <space></space>
+                                <p><fmt:message key="costWithDiscount"/> ${orderChoice.costWithDiscount}
+                                    <ftm:message key="uah"/></p>
+                            </label>
+                        </div>
                     </c:when>
+
+                    <c:otherwise>
+                        <h3><fmt:message key="chooseOther"/></h3>
+
+                        <div class="metod">
+
+                            <input type="radio" name="orderCheck" checked id=${doubleOrder.order1.id}; value=${doubleOrder.order1.id}>
+                            <label class="radio" for=${doubleOrder.order1.id};>
+                                <p>${doubleOrder.order1.carName}</p>
+                                <p>${doubleOrder.order2.carName}</p>
+                                <p><ftm:message key="${doubleOrder.order1.carClass}"/></p>
+                                <p><fmt:message key="passengers"/> ${doubleOrder.order1.passengers}</p>
+                                <space></space>
+                                <p><fmt:message key="cost"/> ${doubleOrder.fullCost} <ftm:message key="uah"/></p>
+
+                                <space></space>
+                                <p><fmt:message key="costWithDiscount"/> ${doubleOrder.costWithDiscount}
+                                    <ftm:message key="uah"/></p>
+                            </label>
+                        </div>
+                    </c:otherwise>
                 </c:choose>
-            </label>
+            </c:when>
+
+            <c:otherwise>
+                <h3><fmt:message key="yourOrder"/></h3>
+
+                <div class="metod">
+
+                    <div>
+                        <input type="radio" name="orderCheck" checked id=${orderChoice.id}; value=${orderChoice.id}>
+                        <label class="radio" for=${orderChoice.id};>
+                            <p>${orderChoice.carName}</p>
+                            <p><ftm:message key="${orderChoice.carClass}"/></p>
+                            <p><fmt:message key="passengers"/> ${orderChoice.passengers}</p>
+                            <space></space>
+                            <p><fmt:message key="cost"/> ${orderChoice.cost} <ftm:message key="uah"/></p>
+
+                        </label>
+                    </div>
+
+                </div>
+            </c:otherwise>
+        </c:choose>
+
+        <c:choose>
+            <c:when test="${requestScope.error != null}">
+                <div style="color:red; text-align: center;"><fmt:message key="${requestScope.error}"/></div>
+            </c:when>
+        </c:choose>
+
+        <div style="display: flex">
+            <button type="submit" class="button" name="submit" value="Submit btn"><fmt:message key="submit"/></button>
+            <button type="submit" class="button" name="cancel" value="Cancel btn"><fmt:message key="cancel"/></button>
         </div>
-</c:when>
-
-<c:otherwise>
-    <h3><fmt:message key="yourOrder"/></h3>
-
-    <div class="metod">
-
-        <div>
-            <input type="radio" name="orderCheck" checked id=${orderChoice.id}; value=${orderChoice.id}>
-            <label class="radio" for=${orderChoice.id};>
-                <p>${orderChoice.carName}</p>
-                <p><fmt:message key="passengers"/> ${orderChoice.passengers}</p>
-                <space></space>
-                <p><fmt:message key="cost"/> ${orderChoice.cost} <ftm:message key="uah"/></p>
-
-            </label>
-        </div>
-
-    </div>
-</c:otherwise>
-</c:choose>
-
-<c:choose>
-    <c:when test="${requestScope.error != null}">
-        <div style="color:red; text-align: center;"><fmt:message key="${requestScope.error}"/></div>
-    </c:when>
-</c:choose>
-
-<div style="display: flex">
-    <button type="submit" class="button" name="submit" value="Submit btn"><fmt:message key="submit"/></button>
-    <button type="submit" class="button" name="cancel" value="Cancel btn"><fmt:message key="cancel"/></button>
-</div>
-</form>
+    </form>
 </div>
 </body>
 </html>

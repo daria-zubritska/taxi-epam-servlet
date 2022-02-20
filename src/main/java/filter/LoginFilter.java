@@ -14,7 +14,6 @@ import java.util.List;
 public class LoginFilter implements Filter {
 
     public static final List<String> ADMIN_PATHS = Arrays.asList("/statistics");
-    public static final List<String> USER_PATHS = Arrays.asList("/makeOrder", "/myPage", "/");
     public static final String USER_ATTRIBUTE = "user";
 
     @Override
@@ -30,7 +29,6 @@ public class LoginFilter implements Filter {
                     return;
                 }
             }
-
         }
         chain.doFilter(request, response);
     }

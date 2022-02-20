@@ -45,7 +45,7 @@ public class OrderDAO {
             order.setLocationTo(rs.getString(FIELD_LOCATION_TO));
             order.setOrderDate(rs.getDate(FIELD_ORDER_DATE).toLocalDate());
             order.setPassengers(rs.getInt(FIELD_PASSENGERS));
-            order.setCost(BigDecimal.valueOf(rs.getLong(FIELD_COST)));
+            order.setCost(rs.getBigDecimal(FIELD_COST));
             order.setUserName(rs.getString(FIELD_USER_NAME));
             order.setCarName(rs.getString(FIELD_CAR_NAME));
         } catch (SQLException e) {
@@ -82,7 +82,7 @@ public class OrderDAO {
             pst.setDate(5, Date.valueOf(order_date));
 
             pst.setInt(6, passengers);
-            pst.setLong(7, Long.parseLong(cost.toString()));
+            pst.setBigDecimal(7, cost);
 
             result = pst.executeUpdate() > 0;
         } catch (SQLException ex) {
