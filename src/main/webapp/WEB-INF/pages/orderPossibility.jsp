@@ -78,7 +78,7 @@
                 </c:choose>
             </c:when>
 
-            <c:otherwise>
+            <c:when test="${orderChoice != null}">
                 <h3><fmt:message key="yourOrder"/></h3>
 
                 <div class="metod">
@@ -96,7 +96,15 @@
                     </div>
 
                 </div>
+            </c:when>
+
+            <c:otherwise>
+                <div style="color:red; text-align: center;">
+                    <fmt:message key="noValidCars"/>
+                </div>
             </c:otherwise>
+
+
         </c:choose>
 
         <c:choose>
@@ -105,9 +113,28 @@
             </c:when>
         </c:choose>
 
+        <c:choose>
+            <c:when test="${requestScope.wait != null}">
+                <div style="text-align: center;"><fmt:message key="${requestScope.wait}"/></div>
+            </c:when>
+        </c:choose>
+
         <div style="display: flex">
-            <button type="submit" class="button" name="submit" value="Submit btn"><fmt:message key="submit"/></button>
-            <button type="submit" class="button" name="cancel" value="Cancel btn"><fmt:message key="cancel"/></button>
+
+            <c:choose>
+                <c:when test="${requestScope.wait == null && (orderChoice != null || absentUserChoice != null)}">
+                    <button type="submit" class="button" name="cancel" value="Cancel btn"><fmt:message
+                            key="cancel"/></button>
+                    <button type="submit" class="button" name="submit" value="Submit btn"><fmt:message
+                            key="submit"/></button>
+                </c:when>
+                <c:otherwise>
+                    <button style="align-self: center" type="submit" class="button" name="ok" value="Okay btn"><fmt:message
+                            key="ok"/></button>
+                </c:otherwise>
+            </c:choose>
+
+
         </div>
     </form>
 </div>

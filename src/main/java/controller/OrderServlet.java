@@ -90,7 +90,7 @@ public class OrderServlet extends HttpServlet {
 
             List<Car> carsByType = CarDAO.findTwoCarsByType(carClass, Integer.parseInt(passengers));
 
-            if(carsByType != null){
+            if(carsByType.size() == 2){
 
                 BigDecimal idealCost = CarDAO.findAppropriateCarCost(carClass, Integer.parseInt(passengers));
 
@@ -171,12 +171,11 @@ public class OrderServlet extends HttpServlet {
                     order.setCostWithDiscount(costWithDiscount);
 
                     session.setAttribute(CHOICE_ATTRIBUTE, order);
-                }else {
-
                 }
             }
 
             resp.sendRedirect("/orderSubmit");
+            return;
 
         }else{
 
