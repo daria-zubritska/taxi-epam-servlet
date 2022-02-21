@@ -5,6 +5,8 @@ import model.entity.Order;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +15,28 @@ public class OrderDAO {
 
     public static final String SQL_ORDER_BY_ID = "SELECT * FROM orders WHERE id=?";
     public static final String SQL_CREATE_ORDER = "INSERT INTO orders(user_id, car_id, location_from, location_to, order_date, passengers, cost) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    public static final String SQL_DELETE_ORDER = "DELETE from orders WHERE id=?";
-    public static final String SQL_ORDER_BY_USER = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE user_id=?";
-    public static final String SQL_ORDER_BY_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE order_date=?";
     public static final String SQL_GET_ORDERS = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id";
     public static final String SQL_GET_LOCATIONS = "SELECT * FROM locations";
     public static final String SQL_GET_LOCATION_ID = "SELECT location_id FROM locations WHERE location_name=?";
     public static final String SQL_GET_DISTANCE = "SELECT distance FROM distances WHERE location_1=? AND location_2=?";
+    public static final String SQL_PAGINATION_ORDERS = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id LIMIT ?, ?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_USER = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE user_name=? LIMIT ?, ?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE order_date=? LIMIT ?, ?";
+    public static final String SQL_ROWS_NUM = "SELECT COUNT(id) FROM orders";
+    public static final String SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE order_date=? AND user_name=? LIMIT ?, ?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_USER_ROWS = "SELECT COUNT(id) FROM orders LEFT JOIN users u on u.user_id = orders.user_id WHERE user_name=?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_DATE_ROWS = "SELECT COUNT(id) FROM orders WHERE order_date=?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE_ROWS = "SELECT COUNT(id) FROM orders LEFT JOIN users u on u.user_id = orders.user_id WHERE order_date=? AND user_name=?";
+
+    public static final String SQL_PAGINATION_ORDERS_ORDERED_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id ORDER BY order_date LIMIT ?, ?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_USER_ORDERED_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE user_name=? ORDER BY order_date LIMIT ?, ?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_DATE_ORDERED_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE order_date=? ORDER BY order_date LIMIT ?, ?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE_ORDERED_DATE = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE order_date=? AND user_name=? ORDER BY order_date LIMIT ?, ?";
+
+    public static final String SQL_PAGINATION_ORDERS_ORDERED_COST = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id ORDER BY orders.cost LIMIT ?, ?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_USER_ORDERED_COST = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE user_name=? ORDER BY orders.cost LIMIT ?, ?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_DATE_ORDERED_COST = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE order_date=? ORDER BY orders.cost LIMIT ?, ?";
+    public static final String SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE_ORDERED_COST = "SELECT * FROM orders LEFT JOIN cars c on c.car_id = orders.car_id LEFT JOIN users u on u.user_id = orders.user_id WHERE order_date=? AND user_name=? ORDER BY orders.cost LIMIT ?, ?";
 
     public static final String FIELD_ID = "id";
     public static final String FIELD_USER_ID = "user_id";
@@ -92,26 +109,12 @@ public class OrderDAO {
         return result;
     }
 
-    public static boolean deleteOrder(int id){
-        boolean result = false;
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement pst = con.prepareStatement(SQL_DELETE_ORDER)) {
-
-            pst.setInt(1, id);
-
-            result = pst.executeUpdate() > 0;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return result;
-    }
-
-    public static List<Order> findOrdersByUser(int user_id) {
+    public static List<Order> getOrdersNoFilter(int start, int recordsPerPage) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement pst = con.prepareStatement(SQL_ORDER_BY_USER)) {
-            pst.setInt(1, user_id);
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS)) {
+            pst.setInt(1, start);
+            pst.setInt(2, recordsPerPage);
             try(ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     orders.add(mapResultSet(rs));
@@ -123,11 +126,12 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> findOrdersByDate(LocalDate date) {
+    public static List<Order> getOrdersNoFilterOrderedDate(int start, int recordsPerPage) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement pst = con.prepareStatement(SQL_ORDER_BY_DATE)) {
-            pst.setDate(1, Date.valueOf(date));
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_ORDERED_DATE)) {
+            pst.setInt(1, start);
+            pst.setInt(2, recordsPerPage);
             try(ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     orders.add(mapResultSet(rs));
@@ -139,10 +143,177 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getAll() {
+    public static List<Order> getOrdersNoFilterOrderedCost(int start, int recordsPerPage) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement pst = con.prepareStatement(SQL_GET_ORDERS)) {
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_ORDERED_COST)) {
+            pst.setInt(1, start);
+            pst.setInt(2, recordsPerPage);
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<Order> getOrdersUserFilter(int start, int recordsPerPage, String userName) {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER)) {
+            pst.setString(1, userName);
+            pst.setInt(2, start);
+            pst.setInt(3, recordsPerPage);
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<Order> getOrdersUserFilterOrderedDate(int start, int recordsPerPage, String userName) {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_ORDERED_DATE)) {
+            pst.setString(1, userName);
+            pst.setInt(2, start);
+            pst.setInt(3, recordsPerPage);
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<Order> getOrdersUserFilterOrderedCost(int start, int recordsPerPage, String userName) {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_ORDERED_COST)) {
+            pst.setString(1, userName);
+            pst.setInt(2, start);
+            pst.setInt(3, recordsPerPage);
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<Order> getOrdersDateFilter(int start, int recordsPerPage, String date) {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_DATE)) {
+            pst.setDate(1, Date.valueOf(LocalDate.parse(date)));
+            pst.setInt(2, start);
+            pst.setInt(3, recordsPerPage);
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<Order> getOrdersDateFilterOrderedDate(int start, int recordsPerPage, String date) {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_DATE_ORDERED_DATE)) {
+            pst.setDate(1, Date.valueOf(LocalDate.parse(date)));
+            pst.setInt(2, start);
+            pst.setInt(3, recordsPerPage);
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<Order> getOrdersDateFilterOrderedCost(int start, int recordsPerPage, String date) {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_DATE_ORDERED_COST)) {
+            pst.setDate(1, Date.valueOf(LocalDate.parse(date)));
+            pst.setInt(2, start);
+            pst.setInt(3, recordsPerPage);
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<Order> getOrdersUserAndDateFilter(int start, int recordsPerPage, String userName, String date) {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE)) {
+            pst.setDate(1, Date.valueOf(LocalDate.parse(date)));
+            pst.setString(2, userName);
+            pst.setInt(3, start);
+            pst.setInt(4, recordsPerPage);
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<Order> getOrdersUserAndDateFilterOrderedDate(int start, int recordsPerPage, String userName, String date) {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE_ORDERED_DATE)) {
+            pst.setDate(1, Date.valueOf(LocalDate.parse(date)));
+            pst.setString(2, userName);
+            pst.setInt(3, start);
+            pst.setInt(4, recordsPerPage);
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return orders;
+    }
+
+    public static List<Order> getOrdersUserAndDateFilterOrderedCost(int start, int recordsPerPage, String userName, String date) {
+        List<Order> orders = new ArrayList<>();
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE_ORDERED_COST)) {
+            pst.setDate(1, Date.valueOf(LocalDate.parse(date)));
+            pst.setString(2, userName);
+            pst.setInt(3, start);
+            pst.setInt(4, recordsPerPage);
             try(ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     orders.add(mapResultSet(rs));
@@ -212,5 +383,72 @@ public class OrderDAO {
 
         return dist;
     }
+
+    public static int getNumberOfRows() {
+        int num = 0;
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_ROWS_NUM)) {
+            try (ResultSet rs = pst.executeQuery()) {
+                if(rs.next())
+                    num = rs.getInt("COUNT(id)");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return num;
+    }
+
+    public static int getNumberOfRowsFilterUser(String userName) {
+        int num = 0;
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_ROWS)) {
+            pst.setString(1, userName);
+            try (ResultSet rs = pst.executeQuery()) {
+                if(rs.next())
+                    num = rs.getInt("COUNT(id)");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return num;
+    }
+
+    public static int getNumberOfRowsFilterDate(String date) {
+        int num = 0;
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_DATE_ROWS)) {
+            pst.setDate(1, Date.valueOf(LocalDate.parse(date)));
+            try (ResultSet rs = pst.executeQuery()) {
+                if(rs.next())
+                    num = rs.getInt("COUNT(id)");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return num;
+    }
+
+    public static int getNumberOfRowsFilterDateUser(String date, String userName) {
+        int num = 0;
+        try (Connection con = DBManager.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE_ROWS)) {
+            pst.setDate(1, Date.valueOf(LocalDate.parse(date)));
+            pst.setString(2, userName);
+            try (ResultSet rs = pst.executeQuery()) {
+                if(rs.next())
+                    num = rs.getInt("COUNT(id)");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return num;
+    }
+
+
+
 
 }

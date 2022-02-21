@@ -23,17 +23,47 @@
 
     <meta charset="UTF-8">
     <title>Statistics</title>
-    <link rel='stylesheet'
-          href='https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/css/dataTables.bootstrap.min.css'>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,500" rel="stylesheet"/>
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="css/statistics.css">
 
 </head>
 <body>
 <div class="row">
     <div class="container">
+
+        <form action="/statistics" method="get">
+
+            Filter by user:
+            <input name="userName" value="<c:out value="${requestScope.userField}"/>">
+            Filter by date:
+            <input name="date" type="date" value="<c:out value="${requestScope.dateField}"/>">
+
+            <select class="form-control" id="records" name="orderBy">
+                <c:choose>
+
+                    <c:when test="${requestScope.currOrder.equals('byDate')}">
+                        <option value="noOrder">No order</option>
+                        <option value="byDate" selected>By Date</option>
+                        <option value="byCost">By cost</option>
+                    </c:when>
+
+                    <c:when test="${requestScope.currOrder.equals('byCost')}">
+                        <option value="noOrder">No order</option>
+                        <option value="byDate">By Date</option>
+                        <option value="byCost" selected>By cost</option>
+                    </c:when>
+
+                    <c:otherwise>
+                        <option value="noOrder" selected>No order</option>
+                        <option value="byDate">By Date</option>
+                        <option value="byCost">By cost</option>
+                    </c:otherwise>
+
+                </c:choose>
+            </select>
+
+            <button type="submit"><fmt:message key="submit"/></button>
+        </form>
+
 
         <table class="table responsive" id="sort">
             <thead>
@@ -63,23 +93,41 @@
                 </tr>
             </c:forEach>
 
-            <%--            <tr>--%>
-            <%--                <td data-table-header="Title">Parent Adolescent Relationship Factors and Adolescent Outcomes Among High-Risk Families.</td>--%>
-            <%--                <td data-table-header="Authors">Matthew Withers, Lenore McWey, Mallory Lucier-Greer</td>--%>
-            <%--                <td data-table-header="Journal">Family Relations</td>--%>
-            <%--                <td data-table-header="Date">Jan. 2017</td>--%>
-            <%--            </tr>--%>
-
             </tbody>
         </table>
     </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/jquery.dataTables.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/dataTables.bootstrap.min.js"></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.0/moment.min.js'></script>
-<script src="js/statistics.js"></script>
+    <nav aria-label="Navigation for statistics">
+        <ul class="pagination">
+            <c:if test="${currentPage != 1}">
+                <li class="page-item"><a class="page-link"
+                                         href="/statistics?recordsPerPage=${recordsPerPage}&currentPage=${currentPage-1}&currFilter=${requestScope.currFilter}&userName=${requestScope.userField}&date=${requestScope.dateField}&orderBy=${requestScope.currOrder}">Previous</a>
+                </li>
+            </c:if>
+
+            <c:forEach begin="1" end="${noOfPages}" var="i">
+                <c:choose>
+                    <c:when test="${currentPage eq i}">
+                        <li class="page-item active"><a class="page-link">
+                                ${i} <span class="sr-only">(current)</span></a>
+                        </li>
+                    </c:when>
+                    <c:otherwise>
+                        <li class="page-item"><a class="page-link"
+                                                 href="/statistics?recordsPerPage=${recordsPerPage}&currentPage=${i}&currFilter=${requestScope.currFilter}&userName=${requestScope.userField}&date=${requestScope.dateField}&orderBy=${requestScope.currOrder}">${i}</a>
+                        </li>
+                    </c:otherwise>
+                </c:choose>
+            </c:forEach>
+
+            <c:if test="${currentPage lt noOfPages}">
+                <li class="page-item"><a class="page-link"
+                                         href="/statistics?recordsPerPage=${recordsPerPage}&currentPage=${currentPage+1}&currFilter=${requestScope.currFilter}&userName=${requestScope.userField}&date=${requestScope.dateField}&orderBy=${requestScope.currOrder}">Next</a>
+                </li>
+            </c:if>
+        </ul>
+    </nav>
+</div>
 
 </body>
 </html>

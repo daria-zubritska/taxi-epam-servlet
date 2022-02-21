@@ -41,11 +41,9 @@ public class LoginServlet extends HttpServlet {
 
         String email = req.getParameter("email");
         String password = req.getParameter("password");
-        String remember = req.getParameter("remember");
 
         Map<String, String> viewAttributes = new HashMap<>();
         viewAttributes.put("email", email);
-        viewAttributes.put("remember", remember);
 
         if(!Security.isEmailValid(email)) {
             viewAttributes.put(ERROR_ATTRIBUTE, "emailNotValid");
@@ -79,10 +77,8 @@ public class LoginServlet extends HttpServlet {
 
         HttpSession session = req.getSession(true);
         session.setAttribute(USER_ATTRIBUTE, user);
-        if("".equals(remember))
-            session.setMaxInactiveInterval(1800); // 30 minutes
-        else
-            session.setMaxInactiveInterval(604800); // 7 days
+
+        session.setMaxInactiveInterval(1800); // 30 minutes
 
         if(user.getRole().isUser()) {
             resp.sendRedirect("/makeOrder");

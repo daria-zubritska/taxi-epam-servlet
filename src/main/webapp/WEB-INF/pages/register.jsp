@@ -76,11 +76,11 @@
     <div class="formcontainer">
         <div class="container">
             <label><strong><fmt:message key="usernameText"/></strong></label>
-            <input type="text" placeholder=<fmt:message key="enterUsername"/> name="username" value="<c:out value="${requestScope.username}" />" required>
+            <input type="text" placeholder=<fmt:message key="enterUsername"/>; name="username" value="<c:out value="${requestScope.username}" />" required>
             <label><strong><fmt:message key="emailText"/></strong></label>
-            <input type="text" placeholder=<fmt:message key="enterEmail"/> name="email" value="<c:out value="${requestScope.email}" />" required>
+            <input type="text" placeholder=<fmt:message key="enterEmail"/>; name="email" value="<c:out value="${requestScope.email}" />" required>
             <label><strong><fmt:message key="passwordText"/></strong></label>
-            <input type="password" placeholder=<fmt:message key="enterPassword"/> name="password" value="<c:out value="${requestScope.password}" />" required>
+            <input type="password" placeholder=<fmt:message key="enterPassword"/>; name="password" value="<c:out value="${requestScope.password}" />" required>
         </div>
         <c:choose>
             <c:when test="${requestScope.error != null}">

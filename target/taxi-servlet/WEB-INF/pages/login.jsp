@@ -82,10 +82,10 @@
         <hr/>
         <div class="container">
             <label><strong><fmt:message key="emailText"/></strong></label>
-            <input type="text" placeholder=<fmt:message key="enterEmail"/> name="email" required
+            <input type="text" placeholder=<fmt:message key="enterEmail"/>; name="email" required
                    value="<c:out value="${requestScope.email}" />">
             <label><strong><fmt:message key="passwordText"/></strong></label>
-            <input type="password" placeholder=<fmt:message key="enterPassword"/> name="password" required
+            <input type="password" placeholder=<fmt:message key="enterPassword"/>; name="password" required
                    value="<c:out value="${requestScope.password}" />">
         </div>
         <c:choose>
@@ -95,10 +95,6 @@
         </c:choose>
         <button type="submit"><fmt:message key="logIn"/></button>
         <div class="container" style="background-color: #eee">
-            <label style="padding-left: 15px">
-                <input type="checkbox" name="remember"
-                       value="<c:out value="${requestScope.remember}" default=""/>"> <fmt:message key="rememberMe"/>
-            </label>
             <span class="psw">
                 <a href="/register" class="text-info"><fmt:message key="register"/></a>
                 <a href="/" class="text-info"><fmt:message key="returnToMain"/></a>

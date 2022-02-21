@@ -25,4 +25,4 @@
 - за клієнтами;
 - за певними датами.
 
-![img.png](img.png)
+![database.png](database.png)
