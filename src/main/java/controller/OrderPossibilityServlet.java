@@ -17,9 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-
 import static filter.LoginFilter.USER_ATTRIBUTE;
 
 @WebServlet(name = "OrderPossibilityServlet", value = "/orderSubmit")
@@ -30,11 +27,11 @@ public class OrderPossibilityServlet extends HttpServlet {
     private final static String CHOICE_ATTRIBUTE = "orderChoice";
     private static final String DOUBLE_ORDER_ATTRIBUTE = "doubleOrder";
     private static final String ABSENT_CHOICE_ATTRIBUTE = "absentUserChoice";
-    private final static String ERROR_ATTRIBUTE = "error";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        //if user is not logged in send them to login page
         if (RequestUtils.getSessionAttribute(req, USER_ATTRIBUTE, User.class) == null) {
             resp.sendRedirect("/logIn");
             return;
@@ -45,7 +42,7 @@ public class OrderPossibilityServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        //if user is not logged in send them to login page
         if (RequestUtils.getSessionAttribute(req, USER_ATTRIBUTE, User.class) == null) {
             resp.sendRedirect("/logIn");
             return;
@@ -56,12 +53,14 @@ public class OrderPossibilityServlet extends HttpServlet {
 
         HttpSession session = req.getSession();
 
+        //depending on button continue
         if (req.getParameter("submit") != null) {
 
             OrderDTO order = (OrderDTO) session.getAttribute(CHOICE_ATTRIBUTE);
 
             if(order !=null) {
 
+                //add order depending on its type
                 if(session.getAttribute(ABSENT_CHOICE_ATTRIBUTE) == null){
                     orderDAO.addOrder(order.getUserId(), order.getCarId(),
                             order.getLocationFrom(), order.getLocationTo(),
@@ -75,13 +74,8 @@ public class OrderPossibilityServlet extends HttpServlet {
                 carDAO.updateStatus(order.getCarId(), 2);
 
             } else {
+                //add two orders if it`s a double order
                 DoubleOrderDTO dOrder = (DoubleOrderDTO) session.getAttribute(DOUBLE_ORDER_ATTRIBUTE);
-
-//                if(dOrder == null){
-//                    viewAttributes.put(ERROR_ATTRIBUTE, "noValidCars");
-//                    passErrorToView(req, resp, viewAttributes);
-//                    return;
-//                }
 
                 OrderDTO order1 = dOrder.getOrder1();
                 OrderDTO order2 = dOrder.getOrder2();
@@ -109,15 +103,10 @@ public class OrderPossibilityServlet extends HttpServlet {
 
             resp.sendRedirect("/");
         } else if (req.getParameter("ok") != null){
+            //send to main page if messages is shown
             resp.sendRedirect("/");
         }
 
     }
 
-    private void passErrorToView(HttpServletRequest req, HttpServletResponse resp, Map<String, String> viewAttributes) throws ServletException, IOException {
-        for (Map.Entry<String, String> entry : viewAttributes.entrySet())
-            req.setAttribute(entry.getKey(), entry.getValue());
-
-        doGet(req, resp);
-    }
 }

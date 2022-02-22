@@ -35,6 +35,7 @@ public class OrderServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        //redirect if not logged in
         if (RequestUtils.getSessionAttribute(req, USER_ATTRIBUTE, User.class) == null) {
             resp.sendRedirect("/logIn");
             return;
@@ -42,6 +43,7 @@ public class OrderServlet extends HttpServlet {
 
         OrderDAO orderDAO = OrderDAO.getInstance();
 
+        //prepare locations lists
         req.setAttribute(LOCATION_ATTRIBUTE, orderDAO.getAllLocations());
 
         req.getRequestDispatcher(PATH).forward(req, resp);
@@ -49,7 +51,7 @@ public class OrderServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        //redirect if not logged in
         if (RequestUtils.getSessionAttribute(req, USER_ATTRIBUTE, User.class) == null) {
             resp.sendRedirect("/logIn");
             return;
@@ -62,6 +64,7 @@ public class OrderServlet extends HttpServlet {
 
         HttpSession session = req.getSession(true);
 
+        //get parameters for search
         String loc_from = req.getParameter("loc_from");
         String loc_to = req.getParameter("loc_to");
         String passengers = req.getParameter("passengers");
@@ -74,6 +77,7 @@ public class OrderServlet extends HttpServlet {
         viewAttributes.put("class", carClass);
 
 
+        //validate parameters
         if(loc_from == null || loc_to == null){
             viewAttributes.put(ERROR_ATTRIBUTE, "locationNotValid");
             passErrorToView(req, resp, viewAttributes);
@@ -87,11 +91,12 @@ public class OrderServlet extends HttpServlet {
 
         Car car = carDAO.findAppropriateCar(carClass, Integer.parseInt(passengers));
 
-
+        //finding appropriate car or cars
         if(car == null){
 
             List<Car> carsByType = carDAO.findTwoCarsByType(carClass, Integer.parseInt(passengers));
 
+            //finding two cars of the needed type
             if(carsByType.size() == 2){
 
                 BigDecimal idealCost = carDAO.findAppropriateCarCost(carClass, Integer.parseInt(passengers));
@@ -145,6 +150,7 @@ public class OrderServlet extends HttpServlet {
 
                 Car carByPass = carDAO.findCarByPassengers(Integer.parseInt(passengers));
 
+                //finding car by passengers amount
                 if(carByPass != null){
 
                     BigDecimal idealCost = carDAO.findAppropriateCarCost(carClass, Integer.parseInt(passengers));
@@ -181,6 +187,7 @@ public class OrderServlet extends HttpServlet {
 
         }else{
 
+            //if we have appropriate car
             User user = (User) session.getAttribute(USER_ATTRIBUTE);
             Date date = new Date();
 

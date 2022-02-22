@@ -24,6 +24,7 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //if user is already logged in send them to order page
         if (RequestUtils.getSessionAttribute(req, USER_ATTRIBUTE, User.class) != null) {
             resp.sendRedirect("/makeOrder");
         } else {
@@ -47,6 +48,7 @@ public class LoginServlet extends HttpServlet {
         Map<String, String> viewAttributes = new HashMap<>();
         viewAttributes.put("email", email);
 
+        //check if values are valid
         if(!Security.isEmailValid(email)) {
             viewAttributes.put(ERROR_ATTRIBUTE, "emailNotValid");
             passErrorToView(req, resp, viewAttributes);
@@ -60,12 +62,14 @@ public class LoginServlet extends HttpServlet {
 
         User user = userDAO.findUserByEmail(email);
 
+        //check if user exists
         if(user == null) {
             viewAttributes.put(ERROR_ATTRIBUTE, "userNull");
             passErrorToView(req, resp, viewAttributes);
             return;
         }
         try {
+            //check if password is correct
             if(!Security.isPasswordCorrect(password, user.getPassword())) {
                 viewAttributes.put(ERROR_ATTRIBUTE, "passwordIncorrect");
                 passErrorToView(req, resp, viewAttributes);
@@ -80,6 +84,7 @@ public class LoginServlet extends HttpServlet {
         HttpSession session = req.getSession(true);
         session.setAttribute(USER_ATTRIBUTE, user);
 
+        //set session and redirect user to page according to their role
         session.setMaxInactiveInterval(1800); // 30 minutes
 
         if(user.getRole().isUser()) {

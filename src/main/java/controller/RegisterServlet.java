@@ -24,6 +24,7 @@ public class RegisterServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //if already logged in send to main page
         if (RequestUtils.getSessionAttribute(req, USER_ATTRIBUTE, User.class) != null) {
             resp.sendRedirect("/makeOrder");
         } else {
@@ -33,6 +34,7 @@ public class RegisterServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //if already logged in send to main page
         if (RequestUtils.getSessionAttribute(req, USER_ATTRIBUTE, User.class) != null) {
 
             resp.sendRedirect("/");
@@ -41,6 +43,7 @@ public class RegisterServlet extends HttpServlet {
 
         UserDAO userDAO = UserDAO.getInstance();
 
+        //get parameters for validation
         String email = req.getParameter("email").toLowerCase().trim();
         String password = req.getParameter("password");
         String name = req.getParameter("username");
@@ -49,6 +52,7 @@ public class RegisterServlet extends HttpServlet {
         viewAttributes.put("email", email);
         viewAttributes.put("username", name);
 
+        //validating parameters
         if(!Security.isPasswordValid(password)) {
             viewAttributes.put(ERROR_ATTRIBUTE, "passwordNotValid");
             passErrorToView(req, resp, viewAttributes);
@@ -65,6 +69,7 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
+        //does this user already exist
         if(userDAO.findUserByEmail(email) != null) {
             viewAttributes.put(ERROR_ATTRIBUTE, "emailExists");
             passErrorToView(req, resp, viewAttributes);
@@ -73,12 +78,14 @@ public class RegisterServlet extends HttpServlet {
 
         boolean userAdded = false;
 
+        //trying to add user
         try {
             userAdded = userDAO.addUser(email, Security.hashPassword(password), name);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        //setting session or telling user about mistake
         if(!userAdded) {
             viewAttributes.put(ERROR_ATTRIBUTE, "somethingWrong");
             passErrorToView(req, resp, viewAttributes);

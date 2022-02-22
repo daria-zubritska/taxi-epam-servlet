@@ -1,12 +1,7 @@
 package database;
 
-import model.entity.User;
-
 import java.sql.*;
 import java.util.Properties;
-
-import static model.UserDAO.SQL_GET_USER_BY_EMAIL;
-import static model.UserDAO.mapResultSet;
 
 public class DBManager {
 

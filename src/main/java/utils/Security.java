@@ -15,7 +15,6 @@ import java.security.SecureRandom;
  */
 public class Security {
 
-    // Hashing parameters
     private static final int ITERATIONS = 200000;
     private static final int KEY_LENGTH = 512; // in bits
     private static final int SALT_LENGTH = 128; // in bits

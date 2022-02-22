@@ -4,6 +4,7 @@ import model.OrderDAO;
 import model.entity.Car;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class OrderService {
@@ -15,6 +16,9 @@ public class OrderService {
         this.orderDAO = orderDAO;
     }
 
+    /**
+     * Counting the cost depending on  car cost and locations
+     */
     public BigDecimal cost(BigDecimal costPerK, String loc_from, String loc_to) {
         BigDecimal cost = costPerK;
 
@@ -23,6 +27,9 @@ public class OrderService {
         return cost.multiply(dist);
     }
 
+    /**
+     * Counting the cost depending on  car cost and locations with discount
+     */
     public BigDecimal costWithDiscount(BigDecimal idealCost, BigDecimal costPerK, String loc_from, String loc_to) {
         double cost = costPerK.doubleValue();
         double costIdeal = idealCost.doubleValue();
@@ -36,6 +43,9 @@ public class OrderService {
         return BigDecimal.valueOf(cost - diskVal);
     }
 
+    /**
+     * Counting the cost for double order depending on cars cost and locations
+     */
     public BigDecimal costForTwoCars(List<Car> cars, String loc_from, String loc_to) {
         BigDecimal costPerK = cars.get(0).getCost();
 
@@ -44,6 +54,9 @@ public class OrderService {
         return cost(costPerK, loc_from, loc_to);
     }
 
+    /**
+     * Counting the cost for double order depending on cars cost and locations with discount
+     */
     public BigDecimal costWithDiscountForTwoCars(BigDecimal idealCost, List<Car> cars, String loc_from, String loc_to) {
         BigDecimal costPerK = cars.get(0).getCost();
 
