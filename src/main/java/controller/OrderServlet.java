@@ -2,7 +2,6 @@ package controller;
 
 import model.dto.DoubleOrderDTO;
 import model.dto.OrderDTO;
-import org.apache.log4j.Logger;
 
 import model.CarDAO;
 import model.OrderDAO;
@@ -33,8 +32,6 @@ public class OrderServlet extends HttpServlet {
     private static final String ABSENT_CHOICE_ATTRIBUTE = "absentUserChoice";
     private static final String DOUBLE_ORDER_ATTRIBUTE = "doubleOrder";
 
-    static Logger log = Logger.getLogger(OrderServlet.class);
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
@@ -43,7 +40,9 @@ public class OrderServlet extends HttpServlet {
             return;
         }
 
-        req.setAttribute(LOCATION_ATTRIBUTE, OrderDAO.getAllLocations());
+        OrderDAO orderDAO = OrderDAO.getInstance();
+
+        req.setAttribute(LOCATION_ATTRIBUTE, orderDAO.getAllLocations());
 
         req.getRequestDispatcher(PATH).forward(req, resp);
     }
@@ -55,6 +54,11 @@ public class OrderServlet extends HttpServlet {
             resp.sendRedirect("/logIn");
             return;
         }
+
+        OrderDAO orderDAO = OrderDAO.getInstance();
+        OrderService orderService = new OrderService(orderDAO);
+
+        CarDAO carDAO = CarDAO.getInstance();
 
         HttpSession session = req.getSession(true);
 
@@ -70,8 +74,6 @@ public class OrderServlet extends HttpServlet {
         viewAttributes.put("class", carClass);
 
 
-        log.info(loc_from + " " + loc_to + " " + passengers + " " + carClass);
-
         if(loc_from == null || loc_to == null){
             viewAttributes.put(ERROR_ATTRIBUTE, "locationNotValid");
             passErrorToView(req, resp, viewAttributes);
@@ -83,22 +85,22 @@ public class OrderServlet extends HttpServlet {
             return;
         }
 
-        Car car = CarDAO.findAppropriateCar(carClass, Integer.parseInt(passengers));
+        Car car = carDAO.findAppropriateCar(carClass, Integer.parseInt(passengers));
 
 
         if(car == null){
 
-            List<Car> carsByType = CarDAO.findTwoCarsByType(carClass, Integer.parseInt(passengers));
+            List<Car> carsByType = carDAO.findTwoCarsByType(carClass, Integer.parseInt(passengers));
 
             if(carsByType.size() == 2){
 
-                BigDecimal idealCost = CarDAO.findAppropriateCarCost(carClass, Integer.parseInt(passengers));
+                BigDecimal idealCost = carDAO.findAppropriateCarCost(carClass, Integer.parseInt(passengers));
 
                 User user = (User) session.getAttribute(USER_ATTRIBUTE);
                 Date date = new Date();
 
-                BigDecimal cost = OrderService.costForTwoCars(carsByType, loc_from, loc_to);
-                BigDecimal costWithDiscount = OrderService.costWithDiscountForTwoCars(idealCost, carsByType, loc_from, loc_to);
+                BigDecimal cost = orderService.costForTwoCars(carsByType, loc_from, loc_to);
+                BigDecimal costWithDiscount = orderService.costWithDiscountForTwoCars(idealCost, carsByType, loc_from, loc_to);
 
                 session.setAttribute(ABSENT_CHOICE_ATTRIBUTE, "noNeeded");
 
@@ -141,17 +143,17 @@ public class OrderServlet extends HttpServlet {
 
             } else{
 
-                Car carByPass = CarDAO.findCarByPassengers(Integer.parseInt(passengers));
+                Car carByPass = carDAO.findCarByPassengers(Integer.parseInt(passengers));
 
                 if(carByPass != null){
 
-                    BigDecimal idealCost = CarDAO.findAppropriateCarCost(carClass, Integer.parseInt(passengers));
+                    BigDecimal idealCost = carDAO.findAppropriateCarCost(carClass, Integer.parseInt(passengers));
 
                     User user = (User) session.getAttribute(USER_ATTRIBUTE);
                     Date date = new Date();
 
-                    BigDecimal cost = OrderService.cost(carByPass.getCost(), loc_from, loc_to);
-                    BigDecimal costWithDiscount = OrderService.costWithDiscount(idealCost, carByPass.getCost(), loc_from, loc_to);
+                    BigDecimal cost = orderService.cost(carByPass.getCost(), loc_from, loc_to);
+                    BigDecimal costWithDiscount = orderService.costWithDiscount(idealCost, carByPass.getCost(), loc_from, loc_to);
 
                     session.setAttribute(ABSENT_CHOICE_ATTRIBUTE, "noNeeded");
 
@@ -182,7 +184,7 @@ public class OrderServlet extends HttpServlet {
             User user = (User) session.getAttribute(USER_ATTRIBUTE);
             Date date = new Date();
 
-            BigDecimal cost = OrderService.cost(car.getCost(), loc_from, loc_to);
+            BigDecimal cost = orderService.cost(car.getCost(), loc_from, loc_to);
 
             session.setAttribute(CHOICE_ATTRIBUTE, new OrderDTO(0,
                     car.getName(),

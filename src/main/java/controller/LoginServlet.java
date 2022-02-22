@@ -39,6 +39,8 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
+        UserDAO userDAO = UserDAO.getInstance();
+
         String email = req.getParameter("email");
         String password = req.getParameter("password");
 
@@ -56,7 +58,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        User user = UserDAO.findUserByEmail(email);
+        User user = userDAO.findUserByEmail(email);
 
         if(user == null) {
             viewAttributes.put(ERROR_ATTRIBUTE, "userNull");

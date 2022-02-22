@@ -13,6 +13,16 @@ import java.util.List;
 
 public class UserDAO {
 
+    private static UserDAO instance = null;
+
+    public static UserDAO getInstance(){
+        if(instance == null){
+            instance = new UserDAO();
+        }
+
+        return instance;
+    }
+
     public static final String SQL_GET_USER_BY_ID = "SELECT * FROM users LEFT JOIN roles ON users.role_id=roles.role_id WHERE user_id=?";
     public static final String SQL_GET_USER_BY_EMAIL = "SELECT * FROM users LEFT JOIN roles ON users.role_id = roles.role_id WHERE email=?";
     public static final String SQL_GET_ALL_USERS = "SELECT * FROM users LEFT JOIN roles ON users.role_id=roles.role_id";
@@ -39,7 +49,7 @@ public class UserDAO {
         return user;
     }
 
-    public static User findUserById(long id) {
+    public User findUserById(long id) {
         User user = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_USER_BY_ID)) {
@@ -55,7 +65,7 @@ public class UserDAO {
         return user;
     }
 
-    public static User findUserByEmail(String email) {
+    public User findUserByEmail(String email) {
         User user = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_USER_BY_EMAIL)) {
@@ -70,7 +80,7 @@ public class UserDAO {
         return user;
     }
 
-    public static List<User> getAllUsers() {
+    public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_ALL_USERS)) {
@@ -85,7 +95,7 @@ public class UserDAO {
         return users;
     }
 
-    public static boolean addUser(String email, String password, String name) {
+    public boolean addUser(String email, String password, String name) {
         boolean result = false;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_ADD_USER)) {
@@ -104,7 +114,7 @@ public class UserDAO {
         return result;
     }
 
-    public static User checkUser(User user) {
+    public User checkUser(User user) {
 
         User dbUser = findUserByEmail(user.getEmail());
         String hashedPass = null;

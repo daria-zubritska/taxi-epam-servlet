@@ -32,30 +32,30 @@
 
         <form action="/statistics" method="get">
 
-            Filter by user:
+            <fmt:message key="filterUser"/>
             <input name="userName" value="<c:out value="${requestScope.userField}"/>">
-            Filter by date:
+            <fmt:message key="filterDate"/>
             <input name="date" type="date" value="<c:out value="${requestScope.dateField}"/>">
 
             <select class="form-control" id="records" name="orderBy">
                 <c:choose>
 
                     <c:when test="${requestScope.currOrder.equals('byDate')}">
-                        <option value="noOrder">No order</option>
-                        <option value="byDate" selected>By Date</option>
-                        <option value="byCost">By cost</option>
+                        <option value="noOrder"><fmt:message key="noOrdering"/></option>
+                        <option value="byDate" selected><fmt:message key="dateOrdering"/></option>
+                        <option value="byCost"><fmt:message key="costOrdering"/></option>
                     </c:when>
 
                     <c:when test="${requestScope.currOrder.equals('byCost')}">
-                        <option value="noOrder">No order</option>
-                        <option value="byDate">By Date</option>
-                        <option value="byCost" selected>By cost</option>
+                        <option value="noOrder"><fmt:message key="noOrdering"/></option>
+                        <option value="byDate"><fmt:message key="dateOrdering"/></option>
+                        <option value="byCost" selected><fmt:message key="costOrdering"/></option>
                     </c:when>
 
                     <c:otherwise>
-                        <option value="noOrder" selected>No order</option>
-                        <option value="byDate">By Date</option>
-                        <option value="byCost">By cost</option>
+                        <option value="noOrder" selected><fmt:message key="noOrdering"/></option>
+                        <option value="byDate"><fmt:message key="dateOrdering"/></option>
+                        <option value="byCost"><fmt:message key="costOrdering"/></option>
                     </c:otherwise>
 
                 </c:choose>
@@ -101,7 +101,7 @@
         <ul class="pagination">
             <c:if test="${currentPage != 1}">
                 <li class="page-item"><a class="page-link"
-                                         href="/statistics?recordsPerPage=${recordsPerPage}&currentPage=${currentPage-1}&currFilter=${requestScope.currFilter}&userName=${requestScope.userField}&date=${requestScope.dateField}&orderBy=${requestScope.currOrder}">Previous</a>
+                                         href="/statistics?recordsPerPage=${recordsPerPage}&currentPage=${currentPage-1}&currFilter=${requestScope.currFilter}&userName=${requestScope.userField}&date=${requestScope.dateField}&orderBy=${requestScope.currOrder}"><fmt:message key="previous"/></a>
                 </li>
             </c:if>
 
@@ -109,7 +109,7 @@
                 <c:choose>
                     <c:when test="${currentPage eq i}">
                         <li class="page-item active"><a class="page-link">
-                                ${i} <span class="sr-only">(current)</span></a>
+                                ${i} <span class="sr-only"><fmt:message key="current"/></span></a>
                         </li>
                     </c:when>
                     <c:otherwise>
@@ -122,7 +122,7 @@
 
             <c:if test="${currentPage lt noOfPages}">
                 <li class="page-item"><a class="page-link"
-                                         href="/statistics?recordsPerPage=${recordsPerPage}&currentPage=${currentPage+1}&currFilter=${requestScope.currFilter}&userName=${requestScope.userField}&date=${requestScope.dateField}&orderBy=${requestScope.currOrder}">Next</a>
+                                         href="/statistics?recordsPerPage=${recordsPerPage}&currentPage=${currentPage+1}&currFilter=${requestScope.currFilter}&userName=${requestScope.userField}&date=${requestScope.dateField}&orderBy=${requestScope.currOrder}"><fmt:message key="next"/></a>
                 </li>
             </c:if>
         </ul>

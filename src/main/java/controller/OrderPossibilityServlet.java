@@ -4,6 +4,7 @@ import model.CarDAO;
 import model.OrderDAO;
 import model.dto.DoubleOrderDTO;
 import model.dto.OrderDTO;
+import model.entity.Car;
 import model.entity.User;
 import org.apache.log4j.Logger;
 import utils.RequestUtils;
@@ -23,8 +24,6 @@ import static filter.LoginFilter.USER_ATTRIBUTE;
 
 @WebServlet(name = "OrderPossibilityServlet", value = "/orderSubmit")
 public class OrderPossibilityServlet extends HttpServlet {
-
-    static Logger log = Logger.getLogger(OrderPossibilityServlet.class);
 
     private static String PATH = "/WEB-INF/pages/orderPossibility.jsp";
 
@@ -52,7 +51,8 @@ public class OrderPossibilityServlet extends HttpServlet {
             return;
         }
 
-
+        OrderDAO orderDAO = OrderDAO.getInstance();
+        CarDAO carDAO = CarDAO.getInstance();
 
         HttpSession session = req.getSession();
 
@@ -63,16 +63,16 @@ public class OrderPossibilityServlet extends HttpServlet {
             if(order !=null) {
 
                 if(session.getAttribute(ABSENT_CHOICE_ATTRIBUTE) == null){
-                    OrderDAO.addOrder(order.getUserId(), order.getCarId(),
+                    orderDAO.addOrder(order.getUserId(), order.getCarId(),
                             order.getLocationFrom(), order.getLocationTo(),
                             order.getOrderDate(), order.getPassengers(), order.getCost());
                 } else{
-                    OrderDAO.addOrder(order.getUserId(), order.getCarId(),
+                    orderDAO.addOrder(order.getUserId(), order.getCarId(),
                             order.getLocationFrom(), order.getLocationTo(),
                             order.getOrderDate(), order.getPassengers(), order.getCostWithDiscount());
                 }
 
-                CarDAO.updateStatus(order.getCarId(), 2);
+                carDAO.updateStatus(order.getCarId(), 2);
 
             } else {
                 DoubleOrderDTO dOrder = (DoubleOrderDTO) session.getAttribute(DOUBLE_ORDER_ATTRIBUTE);
@@ -88,16 +88,16 @@ public class OrderPossibilityServlet extends HttpServlet {
 
                 BigDecimal costOneCar = dOrder.getCostWithDiscount().divide(BigDecimal.valueOf(2));
 
-                OrderDAO.addOrder(order1.getUserId(), order1.getCarId(),
+                orderDAO.addOrder(order1.getUserId(), order1.getCarId(),
                         order1.getLocationFrom(), order1.getLocationTo(),
                         order1.getOrderDate(), order1.getPassengers(), costOneCar);
 
-                OrderDAO.addOrder(order2.getUserId(), order2.getCarId(),
+                orderDAO.addOrder(order2.getUserId(), order2.getCarId(),
                         order2.getLocationFrom(), order2.getLocationTo(),
                         order2.getOrderDate(), order1.getPassengers(), costOneCar);
 
-                CarDAO.updateStatus(order1.getCarId(), 2);
-                CarDAO.updateStatus(order2.getCarId(), 2);
+                carDAO.updateStatus(order1.getCarId(), 2);
+                carDAO.updateStatus(order2.getCarId(), 2);
             }
 
             req.setAttribute("wait", "waitForCar");

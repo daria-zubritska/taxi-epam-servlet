@@ -5,13 +5,21 @@ import model.entity.Order;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OrderDAO {
+
+    private static OrderDAO instance = null;
+
+    public static OrderDAO getInstance(){
+        if(instance == null) {
+            instance = new OrderDAO();
+        }
+
+        return instance;
+    }
 
     public static final String SQL_ORDER_BY_ID = "SELECT * FROM orders WHERE id=?";
     public static final String SQL_CREATE_ORDER = "INSERT INTO orders(user_id, car_id, location_from, location_to, order_date, passengers, cost) VALUES(?, ?, ?, ?, ?, ?, ?)";
@@ -71,23 +79,7 @@ public class OrderDAO {
         return order;
     }
 
-    public static Order findOrderById(long id) {
-        Order order = null;
-        try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement pst = con.prepareStatement(SQL_ORDER_BY_ID)) {
-            pst.setLong(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if(rs.next())
-                    order = mapResultSet(rs);
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return order;
-    }
-
-    public static boolean addOrder(int user_id, int car_id, String location_from, String location_to, LocalDate order_date, int passengers, BigDecimal cost) {
+    public boolean addOrder(int user_id, int car_id, String location_from, String location_to, LocalDate order_date, int passengers, BigDecimal cost) {
         boolean result = false;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_CREATE_ORDER)) {
@@ -109,7 +101,7 @@ public class OrderDAO {
         return result;
     }
 
-    public static List<Order> getOrdersNoFilter(int start, int recordsPerPage) {
+    public List<Order> getOrdersNoFilter(int start, int recordsPerPage) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS)) {
@@ -126,7 +118,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersNoFilterOrderedDate(int start, int recordsPerPage) {
+    public List<Order> getOrdersNoFilterOrderedDate(int start, int recordsPerPage) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_ORDERED_DATE)) {
@@ -143,7 +135,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersNoFilterOrderedCost(int start, int recordsPerPage) {
+    public List<Order> getOrdersNoFilterOrderedCost(int start, int recordsPerPage) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_ORDERED_COST)) {
@@ -160,7 +152,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersUserFilter(int start, int recordsPerPage, String userName) {
+    public List<Order> getOrdersUserFilter(int start, int recordsPerPage, String userName) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER)) {
@@ -178,7 +170,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersUserFilterOrderedDate(int start, int recordsPerPage, String userName) {
+    public List<Order> getOrdersUserFilterOrderedDate(int start, int recordsPerPage, String userName) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_ORDERED_DATE)) {
@@ -196,7 +188,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersUserFilterOrderedCost(int start, int recordsPerPage, String userName) {
+    public List<Order> getOrdersUserFilterOrderedCost(int start, int recordsPerPage, String userName) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_ORDERED_COST)) {
@@ -214,7 +206,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersDateFilter(int start, int recordsPerPage, String date) {
+    public List<Order> getOrdersDateFilter(int start, int recordsPerPage, String date) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_DATE)) {
@@ -232,7 +224,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersDateFilterOrderedDate(int start, int recordsPerPage, String date) {
+    public List<Order> getOrdersDateFilterOrderedDate(int start, int recordsPerPage, String date) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_DATE_ORDERED_DATE)) {
@@ -250,7 +242,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersDateFilterOrderedCost(int start, int recordsPerPage, String date) {
+    public List<Order> getOrdersDateFilterOrderedCost(int start, int recordsPerPage, String date) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_DATE_ORDERED_COST)) {
@@ -268,7 +260,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersUserAndDateFilter(int start, int recordsPerPage, String userName, String date) {
+    public List<Order> getOrdersUserAndDateFilter(int start, int recordsPerPage, String userName, String date) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE)) {
@@ -287,7 +279,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersUserAndDateFilterOrderedDate(int start, int recordsPerPage, String userName, String date) {
+    public List<Order> getOrdersUserAndDateFilterOrderedDate(int start, int recordsPerPage, String userName, String date) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE_ORDERED_DATE)) {
@@ -306,7 +298,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<Order> getOrdersUserAndDateFilterOrderedCost(int start, int recordsPerPage, String userName, String date) {
+    public List<Order> getOrdersUserAndDateFilterOrderedCost(int start, int recordsPerPage, String userName, String date) {
         List<Order> orders = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE_ORDERED_COST)) {
@@ -325,7 +317,7 @@ public class OrderDAO {
         return orders;
     }
 
-    public static List<String> getAllLocations() {
+    public List<String> getAllLocations() {
         List<String> locations = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_LOCATIONS)) {
@@ -340,7 +332,7 @@ public class OrderDAO {
         return locations;
     }
 
-    private static Integer getLocIdByName(String location){
+    private Integer getLocIdByName(String location){
         Integer locId = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_LOCATION_ID)) {
@@ -356,7 +348,7 @@ public class OrderDAO {
         return locId;
     }
 
-    public static int getDistance(String loc_from, String loc_to){
+    public int getDistance(String loc_from, String loc_to){
         int dist = 1;
 
         int loc1Id = getLocIdByName(loc_from);
@@ -384,7 +376,7 @@ public class OrderDAO {
         return dist;
     }
 
-    public static int getNumberOfRows() {
+    public int getNumberOfRows() {
         int num = 0;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_ROWS_NUM)) {
@@ -399,7 +391,7 @@ public class OrderDAO {
         return num;
     }
 
-    public static int getNumberOfRowsFilterUser(String userName) {
+    public int getNumberOfRowsFilterUser(String userName) {
         int num = 0;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_ROWS)) {
@@ -415,7 +407,7 @@ public class OrderDAO {
         return num;
     }
 
-    public static int getNumberOfRowsFilterDate(String date) {
+    public int getNumberOfRowsFilterDate(String date) {
         int num = 0;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_DATE_ROWS)) {
@@ -431,7 +423,7 @@ public class OrderDAO {
         return num;
     }
 
-    public static int getNumberOfRowsFilterDateUser(String date, String userName) {
+    public int getNumberOfRowsFilterDateUser(String date, String userName) {
         int num = 0;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_PAGINATION_ORDERS_WITH_USER_AND_DATE_ROWS)) {

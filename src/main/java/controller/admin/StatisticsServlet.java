@@ -23,6 +23,8 @@ public class StatisticsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        OrderDAO orderDAO = OrderDAO.getInstance();
+
         int currentPage;
         int recordsPerPage;
 
@@ -31,6 +33,7 @@ public class StatisticsServlet extends HttpServlet {
 
         String order = req.getParameter("orderBy");
 
+        //set fields and parameters if exist
         if (order != null) {
             if (order.equals("noOrder")) {
                 req.setAttribute("currOrder", order);
@@ -56,9 +59,10 @@ public class StatisticsServlet extends HttpServlet {
             }
         }
 
+        //check and set current page
         if (req.getParameter("currentPage") == null || req.getParameter("recordsPerPage") == null) {
             currentPage = 1;
-            recordsPerPage = 4;
+            recordsPerPage = 5;
         } else {
             currentPage = Integer.parseInt(req.getParameter("currentPage"));
             recordsPerPage = Integer.parseInt(req.getParameter("recordsPerPage"));
@@ -67,99 +71,101 @@ public class StatisticsServlet extends HttpServlet {
         List<Order> orders;
         int rows;
 
+        //get list according to filters and sorting
         if (req.getAttribute("currFilter") == null) {
 
             if(order != null) {
                 switch (order) {
                     case ("byCost"): {
-                        orders = OrderDAO.getOrdersNoFilterOrderedCost(currentPage * recordsPerPage - recordsPerPage,
+                        orders = orderDAO.getOrdersNoFilterOrderedCost(currentPage * recordsPerPage - recordsPerPage,
                                 recordsPerPage);
                         break;
                     }
                     case ("byDate"): {
-                        orders = OrderDAO.getOrdersNoFilterOrderedDate(currentPage * recordsPerPage - recordsPerPage,
+                        orders = orderDAO.getOrdersNoFilterOrderedDate(currentPage * recordsPerPage - recordsPerPage,
                                 recordsPerPage);
                         break;
                     }
                     default: {
-                        orders = OrderDAO.getOrdersNoFilter(currentPage * recordsPerPage - recordsPerPage,
+                        orders = orderDAO.getOrdersNoFilter(currentPage * recordsPerPage - recordsPerPage,
                                 recordsPerPage);
                         break;
                     }
                 }
             }else{
-                orders = OrderDAO.getOrdersNoFilter(currentPage * recordsPerPage - recordsPerPage,
+                orders = orderDAO.getOrdersNoFilter(currentPage * recordsPerPage - recordsPerPage,
                         recordsPerPage);
             }
 
-            rows = OrderDAO.getNumberOfRows();
+            rows = orderDAO.getNumberOfRows();
         } else if (req.getAttribute("currFilter") == "user") {
 
             switch (order) {
                 case ("byCost"): {
-                    orders = OrderDAO.getOrdersUserFilterOrderedCost(currentPage * recordsPerPage - recordsPerPage,
+                    orders = orderDAO.getOrdersUserFilterOrderedCost(currentPage * recordsPerPage - recordsPerPage,
                             recordsPerPage, req.getAttribute("userField").toString());
                     break;
                 }
                 case ("byDate"): {
-                    orders = OrderDAO.getOrdersUserFilterOrderedDate(currentPage * recordsPerPage - recordsPerPage,
+                    orders = orderDAO.getOrdersUserFilterOrderedDate(currentPage * recordsPerPage - recordsPerPage,
                             recordsPerPage, req.getAttribute("userField").toString());
                     break;
                 }
                 default: {
-                    orders = OrderDAO.getOrdersUserFilter(currentPage * recordsPerPage - recordsPerPage,
+                    orders = orderDAO.getOrdersUserFilter(currentPage * recordsPerPage - recordsPerPage,
                             recordsPerPage, req.getAttribute("userField").toString());
                     break;
                 }
             }
 
-            rows = OrderDAO.getNumberOfRowsFilterUser(req.getAttribute("userField").toString());
+            rows = orderDAO.getNumberOfRowsFilterUser(req.getAttribute("userField").toString());
         } else if (req.getAttribute("currFilter") == "date") {
 
             switch (order) {
                 case ("byCost"): {
-                    orders = OrderDAO.getOrdersDateFilterOrderedCost(currentPage * recordsPerPage - recordsPerPage,
+                    orders = orderDAO.getOrdersDateFilterOrderedCost(currentPage * recordsPerPage - recordsPerPage,
                             recordsPerPage, req.getAttribute("dateField").toString());
                     break;
                 }
                 case ("byDate"): {
-                    orders = OrderDAO.getOrdersDateFilterOrderedDate(currentPage * recordsPerPage - recordsPerPage,
+                    orders = orderDAO.getOrdersDateFilterOrderedDate(currentPage * recordsPerPage - recordsPerPage,
                             recordsPerPage, req.getAttribute("dateField").toString());
                     break;
                 }
                 default: {
-                    orders = OrderDAO.getOrdersDateFilter(currentPage * recordsPerPage - recordsPerPage,
+                    orders = orderDAO.getOrdersDateFilter(currentPage * recordsPerPage - recordsPerPage,
                             recordsPerPage, req.getAttribute("dateField").toString());
                     break;
                 }
             }
 
-            rows = OrderDAO.getNumberOfRowsFilterDate(req.getAttribute("dateField").toString());
+            rows = orderDAO.getNumberOfRowsFilterDate(req.getAttribute("dateField").toString());
         } else {
 
             switch (order) {
                 case ("byCost"): {
-                    orders = OrderDAO.getOrdersUserAndDateFilterOrderedCost(currentPage * recordsPerPage - recordsPerPage,
+                    orders = orderDAO.getOrdersUserAndDateFilterOrderedCost(currentPage * recordsPerPage - recordsPerPage,
                             recordsPerPage, req.getAttribute("userField").toString(), req.getAttribute("dateField").toString());
                     break;
                 }
                 case ("byDate"): {
-                    orders = OrderDAO.getOrdersUserAndDateFilterOrderedDate(currentPage * recordsPerPage - recordsPerPage,
+                    orders = orderDAO.getOrdersUserAndDateFilterOrderedDate(currentPage * recordsPerPage - recordsPerPage,
                             recordsPerPage, req.getAttribute("userField").toString(), req.getAttribute("dateField").toString());
                     break;
                 }
                 default: {
-                    orders = OrderDAO.getOrdersUserAndDateFilter(currentPage * recordsPerPage - recordsPerPage,
+                    orders = orderDAO.getOrdersUserAndDateFilter(currentPage * recordsPerPage - recordsPerPage,
                             recordsPerPage, req.getAttribute("userField").toString(), req.getAttribute("dateField").toString());
                     break;
                 }
             }
 
-            rows = OrderDAO.getNumberOfRowsFilterDateUser(req.getAttribute("dateField").toString(), req.getAttribute("userField").toString());
+            rows = orderDAO.getNumberOfRowsFilterDateUser(req.getAttribute("dateField").toString(), req.getAttribute("userField").toString());
         }
 
         req.setAttribute(STATISTICS_ATTRIBUTE, orders);
 
+        //number of pages
         int nOfPages = rows / recordsPerPage;
 
         if (nOfPages % recordsPerPage > 0) {

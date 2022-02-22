@@ -39,6 +39,8 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
+        UserDAO userDAO = UserDAO.getInstance();
+
         String email = req.getParameter("email").toLowerCase().trim();
         String password = req.getParameter("password");
         String name = req.getParameter("username");
@@ -63,7 +65,7 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        if(UserDAO.findUserByEmail(email) != null) {
+        if(userDAO.findUserByEmail(email) != null) {
             viewAttributes.put(ERROR_ATTRIBUTE, "emailExists");
             passErrorToView(req, resp, viewAttributes);
             return;
@@ -72,7 +74,7 @@ public class RegisterServlet extends HttpServlet {
         boolean userAdded = false;
 
         try {
-            userAdded = UserDAO.addUser(email, Security.hashPassword(password), name);
+            userAdded = userDAO.addUser(email, Security.hashPassword(password), name);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -81,7 +83,7 @@ public class RegisterServlet extends HttpServlet {
             viewAttributes.put(ERROR_ATTRIBUTE, "somethingWrong");
             passErrorToView(req, resp, viewAttributes);
         } else {
-            User user = UserDAO.findUserByEmail(email);
+            User user = userDAO.findUserByEmail(email);
 
             HttpSession session = req.getSession(true);
             session.setAttribute(USER_ATTRIBUTE, user);

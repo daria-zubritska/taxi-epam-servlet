@@ -14,6 +14,16 @@ import java.util.List;
 
 public class CarDAO {
 
+    private static CarDAO instance = null;
+
+    public static CarDAO getInstance(){
+        if(instance == null){
+            instance = new CarDAO();
+        }
+
+        return instance;
+    }
+
     public static final String SQL_GET_CAR_BY_ID = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE car_id=?";
     public static final String SQL_GET_CAR_BY_TYPE = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id WHERE type_name=? AND cars.status_id =?";
     public static final String SQL_GET_ALL_CARS = "SELECT * FROM cars LEFT JOIN status ON cars.status_id=status.status_id LEFT JOIN car_type ON cars.type_id = car_type.type_id";
@@ -48,7 +58,7 @@ public class CarDAO {
         return car;
     }
 
-    public static Car findCarById(long id) {
+    public Car findCarById(long id) {
         Car car = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_CAR_BY_ID)) {
@@ -64,7 +74,7 @@ public class CarDAO {
         return car;
     }
 
-    public static List<Car> findTwoCarsByType(String type, int passengers) {
+    public List<Car> findTwoCarsByType(String type, int passengers) {
         List<Car> cars = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_TWO_CARS_BY_TYPE)) {
@@ -84,7 +94,7 @@ public class CarDAO {
 
     }
 
-    public static Car findAppropriateCar(String type, int passengers) {
+    public Car findAppropriateCar(String type, int passengers) {
         Car car = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_APPROPRIATE_CARS)) {
@@ -102,7 +112,7 @@ public class CarDAO {
 
     }
 
-    public static void updateStatus(long carId, int statusId) {
+    public void updateStatus(long carId, int statusId) {
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_UPDATE_STATUS)) {
             pst.setInt(1, statusId);
@@ -113,7 +123,7 @@ public class CarDAO {
         }
     }
 
-    public static Car findCarByPassengers(int passengers) {
+    public Car findCarByPassengers(int passengers) {
         Car car = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_CAR_BY_PASSENGERS)) {
@@ -130,7 +140,7 @@ public class CarDAO {
         return car;
     }
 
-    public static List<Car> getAllCars() {
+    public List<Car> getAllCars() {
         List<Car> cars = new ArrayList<>();
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_ALL_CARS)) {
@@ -146,7 +156,7 @@ public class CarDAO {
     }
 
 
-    public static BigDecimal findAppropriateCarCost(String type, int passengers) {
+    public BigDecimal findAppropriateCarCost(String type, int passengers) {
         BigDecimal cost = null;
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement pst = con.prepareStatement(SQL_GET_APPROPRIATE_CAR_COST)) {
